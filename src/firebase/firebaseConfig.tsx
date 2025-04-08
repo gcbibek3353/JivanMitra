@@ -2,21 +2,22 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore } from "firebase/firestore";
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, User } from "firebase/auth";
 
 export const FirebaseContext = createContext(null);
 
 export const useFirebase = () => useContext(FirebaseContext);
 
+
 const firebaseConfig = {
-    apiKey: process.env.apiKey,
-    authDomain: process.env.authDomain,
-    projectId: process.env.projectId,
-    storageBucket: process.env.storageBucket,
-    messagingSenderId: process.env.messagingSenderId,
-    appId: process.env.appId,
-    measurementId: process.env.measurementId
+    apiKey: process.env.NEXT_PUBLIC_apiKey,
+    authDomain: process.env.NEXT_PUBLIC_authDomain,
+    projectId: process.env.NEXT_PUBLIC_projectId,
+    storageBucket: process.env.NEXT_PUBLIC_storageBucket,
+    messagingSenderId: process.env.NEXT_PUBLIC_messagingSenderId,
+    appId: process.env.NEXT_PUBLIC_appId,
+    measurementId: process.env.NEXT_PUBLIC_measurementId
 };
 
 // Initialize Firebase
@@ -41,10 +42,10 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         })
     })
 
-    const signUpUserWithEmailAndPassword = async ({ name, email, password }: signUpParams) => {
+    const signUpUserWithEmailAndPassword = async ({ name, age, height, gender, email, password }: signUpParams) => {
         try {
             const userCredentials = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-            // call the function that stores the user to the db when new user is created
+            // TODO : call the function that stores the user to the db when new user is created
             return {
                 success: true,
                 message: "user Created successfully",
@@ -58,7 +59,6 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     const signInUserWithEmailAndPassword = async ({ email, password }: signInParams) => {
         try {
             const userCredentials = await signInWithEmailAndPassword(firebaseAuth, email, password);
-            // To persist sessions via cookies (e.g. for SSR or API protection), you'd need to implement Firebase Admin SDK on your backend, and manually set the session cookies.
             return {
                 success: true,
                 message: "user Logged in successfully",
@@ -69,6 +69,51 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         }
     }
 
+    const addReportToDb = async ({ patientId, report }: addReportParams) => {
+        try {
+            const reportRef = await addDoc(collection(firebasedb, "reports"), {
+                patientId,
+                report
+            })
+            return {
+                success: true,
+                message: "Report saved to database successfully",
+                reportId: reportRef.id
+            }
+        } catch (error) {
+            console.log("Error saving the report in DB", error);
+            return {
+                success: false,
+                message: "FAiled to save report",
+                reportId: ""
+            }
+        }
+    }
+    const getReportByReportId = async (reportId : string) => {
+        try {
+            const docRef = doc(firebasedb,"reports",reportId);
+            const docSnapShot = await getDoc(docRef);
+
+            if (docSnapShot.exists()) {
+                console.log("Document data:", docSnapShot.data());
+                return {
+                    success : true,
+                    message : "got report successfully",
+                    report : docSnapShot.data()
+                }
+              } else {
+                console.log("No such document!");
+              }
+
+        } catch (error) {
+            console.log('Error while getting the report ' , error);
+            return {
+                success : false,
+                message : "Failed to fetch report",
+            }
+            
+        }
+    }
 
     return (
         <FirebaseContext.Provider value={{ signUpUserWithEmailAndPassword, signInUserWithEmailAndPassword, isUserLoggedIn, loggedInUser }}>
