@@ -4,6 +4,7 @@ const ReportPage = () => {
     // Get Id from the params 
     // server : ({params}) 
     // Client : useParams();
+    // Get the report data using reportId and show it here
   return (
     <div>ReportPage
         {/* TODO : Implement the download pdf feature here */}
