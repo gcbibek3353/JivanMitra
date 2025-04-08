@@ -67,12 +67,12 @@ const Agent = ({ patientName, patientId, consultId }: AgentProps) => {
         // else redirect to dashboart with the toast message "Failed to generate report"
 
         try {
-            // const { success, reportId } = await createReport({
-            //     consultId: consultId!,
-            //     patientId: patientId!,
-            //     transcript: messages
-            // });
-            // if (success && reportId) router.push(`/dashboard/report/${reportId}`)
+            const { success, reportId } = await createReport({
+                consultId: consultId!,
+                patientId: patientId!,
+                transcript: messages
+            });
+            if (success && reportId) router.push(`/dashboard/report/${reportId}`)
         } catch (error) {
             console.log('failed to generate report');
             router.push('/dashboard');
@@ -81,7 +81,7 @@ const Agent = ({ patientName, patientId, consultId }: AgentProps) => {
 
     useEffect(() => {
         if (callStatus === CallStatus.FINISHED) {
-            handleGenerateReport(messages)
+            handleGenerateReport(messages);
         }
     }, [messages, callStatus, patientId]);
 
@@ -138,12 +138,15 @@ const Agent = ({ patientName, patientId, consultId }: AgentProps) => {
                         <div className="text-center p-6">
                             {/* Large AI Animation */}
                             <div className="relative mx-auto mb-6">
-                                <div className="w-32 h-32 bg-purple-600/20 rounded-full flex items-center justify-center relative">
-                                    <div className="w-24 h-24 bg-purple-600/30 rounded-full flex items-center justify-center">
-                                        <div className="w-16 h-16 bg-purple-600/40 rounded-full flex items-center justify-center">
-                                            <svg className="w-10 h-10 text-purple-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                                            </svg>
+                                    <div className="mx-auto mb-6 relative">
+                                        <div className="w-32 h-32 rounded-full border-4 border-gray-600 overflow-hidden shadow-lg">
+                                            <Image
+                                                src="/AI_Doctor.png"
+                                                alt="user"
+                                                width={128}
+                                                height={128}
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
                                     </div>
 
@@ -153,11 +156,10 @@ const Agent = ({ patientName, patientId, consultId }: AgentProps) => {
                                             <div className="absolute inset-0 rounded-full border-4 border-purple-500/20 animate-ping opacity-50" style={{ animationDelay: '0.3s' }}></div>
                                         </>
                                     )}
-                                </div>
                             </div>
 
                             <h3 className="text-xl font-bold text-white">AI Doctor</h3>
-                            <p className="text-purple-300 text-sm">Online</p>
+                            <p className="text-purple-300 text-sm">Consultant </p>
 
                             {isSpeaking && (
                                 <div className="mt-4 flex justify-center gap-1">
@@ -178,12 +180,12 @@ const Agent = ({ patientName, patientId, consultId }: AgentProps) => {
                     </div>
 
                     {/* Patient Section */}
-                    <div className="relative bg-gray-900 flex items-center justify-center">
-                        <div className="text-center p-6">
-                            <div className="mx-auto mb-6 relative">
+                    <div className="relative bg-gray-900 flex items-center justify-center ">
+                        <div className="text-center p-6 ">
+                            <div className="mx-auto mb-6 relative ">
                                 <div className="w-32 h-32 rounded-full border-4 border-gray-600 overflow-hidden shadow-lg">
                                     <Image
-                                        src="/user-avatar.png"
+                                        src="/patient.png"
                                         alt="user"
                                         width={128}
                                         height={128}
