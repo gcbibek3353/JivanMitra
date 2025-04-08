@@ -17,7 +17,7 @@ const reportSchema = z.object({
 export type Report = z.infer<typeof reportSchema>;
 
 export const createReport = async (params: createReportParams) => {
-    const { patientId, consultId, transcript } = params;
+    const { patientId, transcript } = params;
 
     try {
         const formattedTranscript = transcript.map((sentence: { role: string, content: string }) => (
@@ -51,15 +51,10 @@ export const createReport = async (params: createReportParams) => {
                 "You are a medical evaluation AI trained to assess patient conversations. Your role is to provide a structured, professional analysis of a patient's reported symptoms and dialogue with a virtual doctor. You must remain neutral, detailed, and focused on identifying risks, gaps, and strengths in the patient's health reporting and understanding. Use clinical reasoning and critical thinking in your evaluation"
         })
 
-        console.log(object);
-
-        // TODO : save this report to the db...
-        // const report = addDoc(reportRef, {......})
-
+        // console.log(object);
         return {
             success: true,
-            reportId: "randomforNow"
-            // reportId : report.id
+            object : object
         }
 
     } catch (error) {

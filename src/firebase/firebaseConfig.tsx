@@ -71,6 +71,9 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
 
     const addReportToDb = async ({ patientId, report }: addReportParams) => {
         try {
+            console.log(patientId);
+            console.log(report);
+            
             const reportRef = await addDoc(collection(firebasedb, "reports"), {
                 patientId,
                 report
@@ -116,7 +119,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <FirebaseContext.Provider value={{ signUpUserWithEmailAndPassword, signInUserWithEmailAndPassword, isUserLoggedIn, loggedInUser }}>
+        <FirebaseContext.Provider value={{ signUpUserWithEmailAndPassword, signInUserWithEmailAndPassword,addReportToDb,getReportByReportId, isUserLoggedIn, loggedInUser }}>
             {children}
         </FirebaseContext.Provider>
     )

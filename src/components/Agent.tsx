@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { vapi } from "@/lib/vapi.sdk"
 import { createReport } from "@/actions/report.action";
 import Image from "next/image";
+import { useFirebase } from "@/firebase/firebaseConfig";
 
 
 enum CallStatus {
@@ -19,11 +20,12 @@ interface SavedMessage {
     content: string;
 }
 
-const Agent = ({ patientName, patientId, consultId }: AgentProps) => {
+const Agent = ({ patientName, patientId }: AgentProps) => {
     const router = useRouter();
     const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
     const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
     const [messages, setMessages] = useState<SavedMessage[]>([]);
+    const firebase = useFirebase();
 
     useEffect(() => {
         const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
@@ -67,12 +69,17 @@ const Agent = ({ patientName, patientId, consultId }: AgentProps) => {
         // else redirect to dashboart with the toast message "Failed to generate report"
 
         try {
-            const { success, reportId } = await createReport({
-                consultId: consultId!,
+            const { success, object } = await createReport({
                 patientId: patientId!,
                 transcript: messages
             });
-            if (success && reportId) router.push(`/dashboard/report/${reportId}`)
+            console.log(object);
+        
+            const res = await firebase.addReportToDb({patientId , report : object });
+            console.log(res);
+            if(res.success && success) router.push(`/dashboard/report/${res.reportId}`)
+
+            // if (success && reportId) router.push(`/dashboard/report/${reportId}`)
         } catch (error) {
             console.log('failed to generate report');
             router.push('/dashboard');
