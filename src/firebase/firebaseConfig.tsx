@@ -1,78 +1,123 @@
-'use client'
-// Import the functions you need from the SDKs you need
+"use client";
+
 import { initializeApp } from "firebase/app";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { addDoc, collection, getFirestore } from "firebase/firestore";
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, User } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  User,
+} from "firebase/auth";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { toast } from "sonner";
 
-export const FirebaseContext = createContext(null);
-
-export const useFirebase = () => useContext(FirebaseContext);
-
+// Firebase config from .env
 const firebaseConfig = {
-    apiKey: process.env.apiKey,
-    authDomain: process.env.authDomain,
-    projectId: process.env.projectId,
-    storageBucket: process.env.storageBucket,
-    messagingSenderId: process.env.messagingSenderId,
-    appId: process.env.appId,
-    measurementId: process.env.measurementId
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const firebaseAuth = getAuth(app);
-const firebasedb = getFirestore(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
-
-export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-    const [loggedInUser, setLoggedInUser] = useState<User | null>(null); // type User from firebase/auth 
-
-    useEffect(() => {
-        onAuthStateChanged(firebaseAuth, (user) => {
-            if (user) {
-                setLoggedInUser(user);
-                setIsUserLoggedIn(true);
-            }
-            else {
-                setIsUserLoggedIn(false);
-            }
-        })
-    })
-
-    const signUpUserWithEmailAndPassword = async ({ name, email, password }: signUpParams) => {
-        try {
-            const userCredentials = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-            // call the function that stores the user to the db when new user is created
-            return {
-                success: true,
-                message: "user Created successfully",
-                userCredentials: userCredentials.user
-            }
-        } catch (error) {
-            console.log('Error while creating the user', error);
-        }
-    }
-
-    const signInUserWithEmailAndPassword = async ({ email, password }: signInParams) => {
-        try {
-            const userCredentials = await signInWithEmailAndPassword(firebaseAuth, email, password);
-            // To persist sessions via cookies (e.g. for SSR or API protection), you'd need to implement Firebase Admin SDK on your backend, and manually set the session cookies.
-            return {
-                success: true,
-                message: "user Logged in successfully",
-                userCredentials: userCredentials.user
-            }
-        } catch (error) {
-            console.log('Error while signing in the user', error);
-        }
-    }
-
-
-    return (
-        <FirebaseContext.Provider value={{ signUpUserWithEmailAndPassword, signInUserWithEmailAndPassword, isUserLoggedIn, loggedInUser }}>
-            {children}
-        </FirebaseContext.Provider>
-    )
+// --- Context Types ---
+interface FirebaseContextType {
+  user: User | null;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithGithub: () => Promise<void>;
+  logOut: () => Promise<void>;
 }
+
+// --- Create Context ---
+const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
+
+export const useFirebase = () => {
+  const context = useContext(FirebaseContext);
+  if (!context) throw new Error("useFirebase must be used within a FirebaseProvider");
+  return context;
+};
+
+// --- Provider ---
+export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      toast.success(`Signed up as ${result.user.email}`);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      toast.success(`Welcome back, ${result.user.email}`);
+    } catch (error: any) {
+      toast.error("Invalid email or password");
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      toast.success(`Signed in as ${result.user.displayName}`);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const signInWithGithub = async () => {
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
+      toast.success(`Signed in as ${result.user.displayName || result.user.email}`);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const logOut = async () => {
+    try {
+      await signOut(auth);
+      toast.success("Logged out");
+    } catch (error: any) {
+      toast.error("Failed to logout");
+    }
+  };
+
+  return (
+    <FirebaseContext.Provider
+      value={{
+        user,
+        signUpWithEmail,
+        signInWithEmail,
+        signInWithGoogle,
+        signInWithGithub,
+        logOut,
+      }}
+    >
+      {children}
+    </FirebaseContext.Provider>
+  );
+};

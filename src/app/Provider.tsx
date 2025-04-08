@@ -1,11 +1,17 @@
 'use client'
 
+import { FirebaseProvider } from '@/firebase/firebaseConfig'
 import React, { ReactNode } from 'react'
 
 const Provider = ({children} : {children : ReactNode}) => {
     // TODO : use firebase provider , theme provider , toast Provider ... here
   return (
-    <div>{children}</div>
+    <div>
+      <FirebaseProvider>
+        {children}
+      </FirebaseProvider>
+      
+      </div>
   )
 }
 
