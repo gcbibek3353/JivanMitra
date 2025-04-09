@@ -52,7 +52,7 @@ export type Nutrition = z.infer<typeof nutritionPlanSchema>;
 export const getNutritions = async (userInfo: UserInfoParams) => {
     //  Get height , weight , age , gender , (past interactions with AI_doctor) and request gemini to suggest a perfect Nutrient/diet
     try {
-        console.log(`control inside getNutritions`); 
+        // console.log(`control inside getNutritions`); 
         const googleModel = google('gemini-2.0-flash-001', {
             structuredOutputs: false,
         });
