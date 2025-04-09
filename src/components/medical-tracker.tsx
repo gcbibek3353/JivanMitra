@@ -27,27 +27,7 @@ type SicknessRecord = {
 };
 
 export function MedicationTracker() {
-  const [records, setRecords] = useState<SicknessRecord[]>([
-    {
-      id: "1",
-      sickness: "Hypertension",
-      medications: [
-        { name: "Lisinopril 10mg", dosage: 1, times: ["08:00", "20:00"] },
-        { name: "Aspirin 81mg", dosage: 1, times: ["08:00"] },
-      ],
-    },
-    {
-      id: "2",
-      sickness: "Diabetes Type 2",
-      medications: [
-        {
-          name: "Metformin 500mg",
-          dosage: 2,
-          times: ["08:00", "13:00", "20:00"],
-        },
-      ],
-    },
-  ]);
+  const [records, setRecords] = useState<SicknessRecord[]>([]);
 
   const [open, setOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<SicknessRecord | null>(
@@ -58,6 +38,7 @@ export function MedicationTracker() {
   useEffect(() => {
     const loadRecords = async () => {
       const data = await firebase.fetchAllInfoRecords();
+      console.log(data);
       setRecords(data);
     };
 
