@@ -27,6 +27,7 @@ export default function SignInPage() {
     setLoading(true)
     try {
       await signInWithEmail(email, password);
+      console.log('control here');
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Email sign-in failed");
@@ -157,7 +158,7 @@ export default function SignInPage() {
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <a href="/sign-up" className="text-indigo-600 hover:underline">
             Sign up
           </a>

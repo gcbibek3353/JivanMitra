@@ -1,3 +1,4 @@
+
 interface AgentProps {
   patientName: string;
   patientId?: string;
@@ -6,8 +7,12 @@ interface AgentProps {
 }
 
 interface createReportParams {
-  consultId: string;
   patientId: string;
   transcript: { role: string; content: string }[];
   reportId?: string;
+}
+
+interface addReportParams {
+  patientId : string;
+  report : Report
 }

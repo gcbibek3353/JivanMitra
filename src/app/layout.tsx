@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Provider from "./Provider";
-import { FirebaseProvider } from "@/firebase/firebaseConfig";
-import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +30,6 @@ export default function RootLayout({
       >
         <Provider>
           {children}
-          <Toaster/>
         </Provider>
       </body>
     </html>

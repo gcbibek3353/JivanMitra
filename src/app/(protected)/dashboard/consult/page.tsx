@@ -5,7 +5,7 @@ const ConsultPage = () => {
   return (
     <div>
       <h2>Patient Interact with Doctor </h2>
-        <Agent patientName={"Rajesh"} />
+        <Agent patientName={"Rajesh"} patientId='abcdbhaikodd'/>
         {/* This will contain the core logic of user interacting with AI */}
     </div>
   )
