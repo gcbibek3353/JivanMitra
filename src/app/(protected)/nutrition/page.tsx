@@ -13,6 +13,7 @@ const CreateDietPage = () => {
   const [diets, setDiets] = useState<dietResponse[] | null>(null);
   const [expandedDietIndex, setExpandedDietIndex] = useState<number | null>(null);
   const { addNutritionToDb, loggedInUser, getNutritionsByPatientId } = useFirebase();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchDiets = async () => {
     const res = await getNutritionsByPatientId(loggedInUser?.uid as string);
@@ -24,6 +25,7 @@ const CreateDietPage = () => {
   }, [])
 
   const dietGenerator = async () => {
+    setLoading(true);
     try {
       const { success, nutrition } = await getNutritions({
         age: '20',
@@ -32,10 +34,10 @@ const CreateDietPage = () => {
         gender: 'male',
         summary: `John is a 45-year-old male who stands 5 feet 10 inches tall and weighs 210 pounds...`
       });
-      
-      const res = await addNutritionToDb({ 
-        patientId: loggedInUser?.uid as string, 
-        nutrition 
+
+      const res = await addNutritionToDb({
+        patientId: loggedInUser?.uid as string,
+        nutrition
       });
 
       if (res.success && success) {
@@ -43,6 +45,9 @@ const CreateDietPage = () => {
       }
     } catch (error) {
       console.error('Failed to generate the diet', error);
+    }
+    finally {
+      setLoading(false);
     }
   }
 
@@ -58,11 +63,12 @@ const CreateDietPage = () => {
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Nutrition Plans</h1>
-        <button 
+        <button
+          disabled={loading}
           onClick={dietGenerator}
           className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
         >
-          Generate New Diet
+          {loading ? "Generating new Diet" : "Generate New Diet"}
         </button>
       </div>
 
@@ -77,8 +83,8 @@ const CreateDietPage = () => {
       ) : (
         <div className="grid gap-6">
           {diets.map((diet, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 transition-all"
             >
               <div className="p-6">
@@ -91,7 +97,7 @@ const CreateDietPage = () => {
                       {diet.nutrition.total_calories_per_day.toLocaleString()} kcal/day
                     </p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => toggleExpandDiet(index)}
                     className="text-blue-600 hover:text-blue-800 font-medium"
                   >
@@ -126,7 +132,7 @@ const CreateDietPage = () => {
                               {meal.calories} kcal
                             </span>
                           </div>
-                          
+
                           <div className="mt-3 grid gap-2">
                             {meal.foods.map((food, foodIndex) => (
                               <div key={foodIndex} className="flex justify-between text-sm">

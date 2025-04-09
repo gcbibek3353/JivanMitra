@@ -29,3 +29,8 @@ interface addNutritionParams{
   patientId : string;
   nutrition : Nutrition
 }
+
+interface addWorkoutParams {
+  patientId : string;
+  workout : WorkOut
+}
