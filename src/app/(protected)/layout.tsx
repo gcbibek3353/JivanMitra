@@ -11,7 +11,7 @@ const layout = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!authloading && !loggedInUser) {
-      router.push('/sign-in');
+      router.push("/sign-in");
     }
   }, [loggedInUser, authloading, router]);
 
@@ -27,4 +27,4 @@ const layout = ({ children }: { children: ReactNode }) => {
   )
 }
 
-export default layout
+export default layout;
