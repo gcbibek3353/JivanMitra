@@ -2,15 +2,17 @@
 
 import { initializeApp } from "firebase/app";
 import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider,
-    GithubAuthProvider,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    signOut,
-    User,
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  User,
+  setPersistence,
+  browserSessionPersistence
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { addDoc, collection, doc, getDoc, getFirestore } from "firebase/firestore";
@@ -29,14 +31,19 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+setPersistence(auth,browserSessionPersistence)
+
 const firebasedb = getFirestore(app);
+
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
+
 
 // --- Context Types ---
 
 //TODO : need to update interface whenever new function is added to the context
 interface FirebaseContextType {
+
     isUserLoggedIn: boolean;
     loggedInUser: User | null;
     signUpWithEmail: (email: string, password: string) => Promise<void>;
@@ -44,6 +51,7 @@ interface FirebaseContextType {
     signInWithGoogle: () => Promise<void>;
     signInWithGithub: () => Promise<void>;
     logOut: () => Promise<void>;
+      authloading:boolean
     addReportToDb: ({ patientId, report }: addReportParams) => Promise<{
         success: boolean,
         message: string,
@@ -69,12 +77,14 @@ export const useFirebase = () => {
 export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
     const [loggedInUser, setLoggedInUser] = useState<User | null>(null); // type User from firebase/auth 
-
+const[authloading,setAuthloading]=useState(true)
+      
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 setLoggedInUser(user);
                 setIsUserLoggedIn(true);
+              setAuthloading(false)
             }
             else {
                 setIsUserLoggedIn(false);
@@ -149,6 +159,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
                 reportId: ""
             }
         }
+
     }
 
     const getReportByReportId = async (reportId: string) => {
@@ -187,9 +198,11 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
             signInWithGithub,
             logOut,
             addReportToDb,
-            getReportByReportId
+            getReportByReportId,
+              authloading
         }}>
             {children}
         </FirebaseContext.Provider>
     )
 }
+
