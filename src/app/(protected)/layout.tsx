@@ -1,10 +1,19 @@
 'use client'
-import React, { ReactNode } from 'react'
+import { useFirebase } from '@/firebase/firebaseConfig';
+import { useRouter } from 'next/navigation';
+import React, { ReactNode, useEffect } from 'react'
 
-const layout = ({children} : {children : ReactNode}) => {
-    // TODO : check if the user is signed in or not . 
-    // If signed in return {children}
-    // else redirect to landing page 
+const layout = ({ children }: { children: ReactNode }) => {
+  const { loggedInUser } = useFirebase();
+  const router = useRouter();
+
+  // useEffect(() => {
+  //   if (!loggedInUser) {
+  //     router.push('/sign-in');
+  //   }
+  // }, [loggedInUser, router]);
+
+  if (!loggedInUser) return null;
 
   return (
     <div>{children}</div>

@@ -4,6 +4,7 @@ interface AgentProps {
   patientId?: string;
   consultId?: string;
   reportId?: string;
+  summary : string;
 }
 
 interface createReportParams {
@@ -15,4 +16,12 @@ interface createReportParams {
 interface addReportParams {
   patientId : string;
   report : Report
+}
+
+interface UserInfoParams {
+  age : string;
+  height : string;
+  weight : string;
+  gender : string;
+  summary : string
 }
