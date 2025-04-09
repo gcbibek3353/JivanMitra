@@ -14,8 +14,8 @@ import {
 import { useFirebase } from '@/firebase/firebaseConfig';
 
 function SidebarNav() {
-  const { user, logOut } = useFirebase();
-  console.log(user)
+  const { loggedInUser, logOut } = useFirebase();
+  console.log(loggedInUser)
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -132,9 +132,9 @@ function SidebarNav() {
               isSidebarCollapsed ? 'justify-center' : 'space-x-4'
             } mb-4 transition-all duration-150`}
           >
-            {user?.photoURL ? (
+            {loggedInUser?.photoURL ? (
               <img
-                src={user.photoURL}
+                src={loggedInUser.photoURL}
                 alt="User avatar"
                 className="w-12 h-12 rounded-full object-cover transition-all duration-150"
               />
@@ -142,9 +142,9 @@ function SidebarNav() {
               <button
                 className="w-12 h-12 rounded-full bg-white text-blue-600 font-bold text-lg flex items-center justify-center border border-blue-200 shadow-sm hover:shadow-md hover:ring-2 hover:ring-blue-400/50 transition-all duration-200"
                 aria-label="User"
-                title={user?.email || 'User'}
+                title={loggedInUser?.email || 'User'}
               >
-                {user?.email?.split('@')[0]?.charAt(0).toUpperCase()}
+                {loggedInUser?.email?.split('@')[0]?.charAt(0).toUpperCase()}
               </button>
 
             )}
@@ -154,7 +154,7 @@ function SidebarNav() {
               } transition-all duration-150 ease-linear overflow-hidden`}
             >
               
-              <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+              <p className="text-sm text-gray-500 truncate">{loggedInUser?.email}</p>
             </div>
           </div>
           <button
