@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 export default function SignUpPage() {
   const firebase = useFirebase();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,17 +25,21 @@ export default function SignUpPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Email and password are required");
+
+    if (!email || !password || !name || !age || !height || !gender) {
+      toast.error("Please fill in all fields");
       return;
     }
 
+    setLoading(true);
     try {
       await firebase.signUpWithEmail(email, password);
       toast.success("You have successfully signed up");
       router.push("/sign-in");
     } catch (err: any) {
       toast.error(err.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,7 +94,7 @@ export default function SignUpPage() {
           <hr className="flex-grow border-gray-300" />
         </div>
 
-        <form className="space-y-4" >
+        <form className="space-y-4" onSubmit={handleSignup}>
           <input
             type="email"
             placeholder="Enter your email address"
@@ -152,10 +157,38 @@ export default function SignUpPage() {
 
           <button
             type="submit"
-            onClick={handleSignup}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-all"
+            disabled={loading}
+            className={`w-full bg-indigo-600 text-white py-2 rounded-lg transition-all ${
+              loading ? "opacity-70 cursor-not-allowed" : "hover:bg-indigo-700"
+            }`}
           >
-            Sign up
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 00-8 8h4z"
+                  ></path>
+                </svg>
+                Signing up...
+              </div>
+            ) : (
+              "Sign up"
+            )}
           </button>
         </form>
 

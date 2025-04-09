@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const[loading,setLoading]=useState(false)
   const router = useRouter();
   const { signInWithEmail, signInWithGoogle, signInWithGithub } = useFirebase();
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -23,13 +24,15 @@ export default function SignInPage() {
       toast.error("Fill in both fields");
       return;
     }
-
+    setLoading(true)
     try {
       await signInWithEmail(email, password);
       console.log('control here');
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Email sign-in failed");
+    } finally{
+      setLoading(false)
     }
   };
 
@@ -118,11 +121,40 @@ export default function SignInPage() {
           </div>
 
           <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-all"
-          >
-            Log in
-          </button>
+          type="submit"
+          disabled={loading}
+          className={`w-full bg-indigo-600 text-white py-2 rounded-lg transition-all ${
+            loading ? "opacity-70 cursor-not-allowed" : "hover:bg-indigo-700"
+          }`}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center gap-2">
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 00-8 8h4z"
+                ></path>
+              </svg>
+              Logging in...
+            </div>
+          ) : (
+            "Log in"
+          )}
+        </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">

@@ -3,34 +3,27 @@
 import { useFirebase } from '@/firebase/firebaseConfig';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import SidebarNav from './Navbar';
+import { FaSpinner } from 'react-icons/fa'; // Create this component or use a simple div
 
 const Dashboard = () => {
-  const { loggedInUser, logOut } = useFirebase();
+  const { user, authloading } = useFirebase();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loggedInUser) {
+    if (!authloading && !user) {
       router.push('/sign-in');
     }
-  }, [loggedInUser, router]);
+  }, [user, authloading, router]);
 
-  const handleLogout = async () => {
-    await logOut();
-    router.push('/sign-in');
-  };
-
-  if (!loggedInUser) return null; // Avoid flickering for a brief moment
+  if (authloading) {
+    return <FaSpinner />; // Or <div>Loading...</div>
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-4">Welcome to your Dashboard</h1>
-      <p className="mb-6 text-gray-700">Logged in as <span className="font-semibold">{loggedInUser.email}</span></p>
-      <button
-        onClick={handleLogout}
-        className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
-      >
-        Logout
-      </button>
+    <div>
+      <SidebarNav />
+      {/* Your dashboard content */}
     </div>
   );
 };
