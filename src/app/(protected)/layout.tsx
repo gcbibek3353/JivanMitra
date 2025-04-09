@@ -3,6 +3,7 @@ import { useFirebase } from '@/firebase/firebaseConfig';
 import { useRouter } from 'next/navigation';
 import React, { ReactNode, useEffect } from 'react'
 import { FaSpinner } from 'react-icons/fa';
+import SidebarNav from './dashboard/Navbar';
 
 const layout = ({ children }: { children: ReactNode }) => {
   const { loggedInUser, authloading } = useFirebase();
@@ -19,7 +20,10 @@ const layout = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <div>{children}</div>
+    <div className='flex'>
+       <SidebarNav />
+      {children}
+      </div>
   )
 }
 

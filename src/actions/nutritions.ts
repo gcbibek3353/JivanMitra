@@ -77,7 +77,7 @@ export const getNutritions = async (userInfo: UserInfoParams) => {
         return {
             success: true,
             message: "nutritions generated successfully",
-            nutritionId: ""
+            nutrition : object,
         }
         //TODO: whenever it is received store in db
 
@@ -86,7 +86,7 @@ export const getNutritions = async (userInfo: UserInfoParams) => {
         return {
             success: false,
             message: "failed to get the nutritions",
-            nutritionId: ""
+            nutrition : ""
         }
 
     }

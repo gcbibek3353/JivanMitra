@@ -11,8 +11,9 @@ const Dashboard = () => {
 
   return (
     <div>
-      <SidebarNav />
+      {/* <SidebarNav /> */}
       {/* Your dashboard content */}
+      dashboard content
     </div>
   );
 };

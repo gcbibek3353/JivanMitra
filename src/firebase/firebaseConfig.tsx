@@ -15,8 +15,9 @@ import {
   browserSessionPersistence
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { addDoc, collection, doc, getDoc, getFirestore } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { toast } from "sonner";
+import { Nutrition } from "@/actions/nutritions";
 
 // Firebase config from .env
 const firebaseConfig = {
@@ -43,7 +44,6 @@ const githubProvider = new GithubAuthProvider();
 
 //TODO : need to update interface whenever new function is added to the context
 interface FirebaseContextType {
-
     isUserLoggedIn: boolean;
     loggedInUser: User | null;
     signUpWithEmail: (email: string, password: string) => Promise<void>;
@@ -62,6 +62,15 @@ interface FirebaseContextType {
         message: string,
         report: any
     }>;
+    addNutritionToDb: ({ patientId, nutrition }: addNutritionParams) => Promise<{
+        success: boolean,
+        message: string,
+        nutritionId: string
+    }>;
+    getNutritionsByPatientId: (patientId: string) => Promise<{
+        patientId: string,
+        nutrition: Nutrition
+    }[]>;
 }
 
 // --- Create Context ---
@@ -127,7 +136,7 @@ const[authloading,setAuthloading]=useState(true)
             toast.error(error.message);
         }
     };
-
+    
     const logOut = async () => {
         try {
             await signOut(auth);
@@ -188,6 +197,46 @@ const[authloading,setAuthloading]=useState(true)
         }
     }
 
+    const addNutritionToDb = async ({ patientId, nutrition }: addNutritionParams) => { 
+        try {
+            const nutritionRef = await addDoc(collection(firebasedb, "nutritions"), {
+                patientId,
+                nutrition
+            })
+            return {
+                success: true,
+                message: "Nutrition saved to database successfully",
+                nutritionId: nutritionRef.id
+            }
+        } catch (error) {
+            console.log("Error saving the nutrition in DB", error);
+            return {
+                success: false,
+                message: "FAiled to save nutrition",
+                nutritionId: ""
+            }
+        }
+    }
+
+
+    const getNutritionsByPatientId = async (patientId: string) => {
+        try {
+          const nutritionsRef = collection(firebasedb, "nutritions");
+      
+          const q = query(nutritionsRef, where("patientId", "==", patientId));
+          const querySnapshot = await getDocs(q);
+      
+          const nutritions = querySnapshot.docs.map(doc => ({
+            ...doc.data()
+          }));
+          console.log("Fetched nutritions:", nutritions);
+          return nutritions;
+        } catch (error) {
+          console.error("Error fetching nutrition data:", error);
+          return [];
+        }
+      };
+
     return (
         <FirebaseContext.Provider value={{
             isUserLoggedIn,
@@ -199,6 +248,8 @@ const[authloading,setAuthloading]=useState(true)
             logOut,
             addReportToDb,
             getReportByReportId,
+            addNutritionToDb,
+            getNutritionsByPatientId,
               authloading
         }}>
             {children}

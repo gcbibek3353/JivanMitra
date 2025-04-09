@@ -25,3 +25,8 @@ interface UserInfoParams {
   gender : string;
   summary : string
 }
+
+interface addNutritionParams{
+  patientId : string;
+  nutrition : Nutrition
+}
