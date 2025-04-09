@@ -1,37 +1,77 @@
-'use client'
-// Import the functions you need from the SDKs you need
+"use client";
+
 import { initializeApp } from "firebase/app";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+    GithubAuthProvider,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+    User,
+} from "firebase/auth";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { addDoc, collection, doc, getDoc, getFirestore } from "firebase/firestore";
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, User } from "firebase/auth";
+import { toast } from "sonner";
 
-export const FirebaseContext = createContext(null);
-
-export const useFirebase = () => useContext(FirebaseContext);
-
-
+// Firebase config from .env
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_apiKey,
-    authDomain: process.env.NEXT_PUBLIC_authDomain,
-    projectId: process.env.NEXT_PUBLIC_projectId,
-    storageBucket: process.env.NEXT_PUBLIC_storageBucket,
-    messagingSenderId: process.env.NEXT_PUBLIC_messagingSenderId,
-    appId: process.env.NEXT_PUBLIC_appId,
-    measurementId: process.env.NEXT_PUBLIC_measurementId
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const firebaseAuth = getAuth(app);
+const auth = getAuth(app);
 const firebasedb = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
+// --- Context Types ---
 
+//TODO : need to update interface whenever new function is added to the context
+interface FirebaseContextType {
+    isUserLoggedIn: boolean;
+    loggedInUser: User | null;
+    signUpWithEmail: (email: string, password: string) => Promise<void>;
+    signInWithEmail: (email: string, password: string) => Promise<void>;
+    signInWithGoogle: () => Promise<void>;
+    signInWithGithub: () => Promise<void>;
+    logOut: () => Promise<void>;
+    addReportToDb: ({ patientId, report }: addReportParams) => Promise<{
+        success: boolean,
+        message: string,
+        reportId: string
+    }>;
+    getReportByReportId: (reportId: string) => Promise<{
+        success: boolean,
+        message: string,
+        report: any
+    }>;
+}
+
+// --- Create Context ---
+const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
+
+export const useFirebase = () => {
+    const context = useContext(FirebaseContext);
+    if (!context) throw new Error("useFirebase must be used within a FirebaseProvider");
+    return context;
+};
+
+// --- Provider ---
 export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
     const [loggedInUser, setLoggedInUser] = useState<User | null>(null); // type User from firebase/auth 
 
     useEffect(() => {
-        onAuthStateChanged(firebaseAuth, (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 setLoggedInUser(user);
                 setIsUserLoggedIn(true);
@@ -42,38 +82,56 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         })
     })
 
-    const signUpUserWithEmailAndPassword = async ({ name, age, height, gender, email, password }: signUpParams) => {
+    const signUpWithEmail = async (email: string, password: string) => {
         try {
-            const userCredentials = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-            // TODO : call the function that stores the user to the db when new user is created
-            return {
-                success: true,
-                message: "user Created successfully",
-                userCredentials: userCredentials.user
-            }
-        } catch (error) {
-            console.log('Error while creating the user', error);
+            const result = await createUserWithEmailAndPassword(auth, email, password);
+            toast.success(`Signed up as ${result.user.email}`);
+        } catch (error: any) {
+            toast.error(error.message);
         }
-    }
+    };
 
-    const signInUserWithEmailAndPassword = async ({ email, password }: signInParams) => {
+    const signInWithEmail = async (email: string, password: string) => {
         try {
-            const userCredentials = await signInWithEmailAndPassword(firebaseAuth, email, password);
-            return {
-                success: true,
-                message: "user Logged in successfully",
-                userCredentials: userCredentials.user
-            }
-        } catch (error) {
-            console.log('Error while signing in the user', error);
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            toast.success(`Welcome back, ${result.user.email}`);
+        } catch (error: any) {
+            toast.error("Invalid email or password");
         }
-    }
+    };
+
+    const signInWithGoogle = async () => {
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            toast.success(`Signed in as ${result.user.displayName}`);
+        } catch (error: any) {
+            toast.error(error.message);
+        }
+    };
+
+    const signInWithGithub = async () => {
+        try {
+            const result = await signInWithPopup(auth, githubProvider);
+            toast.success(`Signed in as ${result.user.displayName || result.user.email}`);
+        } catch (error: any) {
+            toast.error(error.message);
+        }
+    };
+
+    const logOut = async () => {
+        try {
+            await signOut(auth);
+            toast.success("Logged out");
+        } catch (error: any) {
+            toast.error("Failed to logout");
+        }
+    };
 
     const addReportToDb = async ({ patientId, report }: addReportParams) => {
         try {
             console.log(patientId);
             console.log(report);
-            
+
             const reportRef = await addDoc(collection(firebasedb, "reports"), {
                 patientId,
                 report
@@ -92,34 +150,45 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
             }
         }
     }
-    const getReportByReportId = async (reportId : string) => {
+
+    const getReportByReportId = async (reportId: string) => {
         try {
-            const docRef = doc(firebasedb,"reports",reportId);
+            const docRef = doc(firebasedb, "reports", reportId);
             const docSnapShot = await getDoc(docRef);
 
             if (docSnapShot.exists()) {
                 console.log("Document data:", docSnapShot.data());
                 return {
-                    success : true,
-                    message : "got report successfully",
-                    report : docSnapShot.data()
+                    success: true,
+                    message: "got report successfully",
+                    report: docSnapShot.data()
                 }
-              } else {
+            } else {
                 console.log("No such document!");
-              }
+            }
 
         } catch (error) {
-            console.log('Error while getting the report ' , error);
+            console.log('Error while getting the report ', error);
             return {
-                success : false,
-                message : "Failed to fetch report",
+                success: false,
+                message: "Failed to fetch report",
             }
-            
+
         }
     }
 
     return (
-        <FirebaseContext.Provider value={{ signUpUserWithEmailAndPassword, signInUserWithEmailAndPassword,addReportToDb,getReportByReportId, isUserLoggedIn, loggedInUser }}>
+        <FirebaseContext.Provider value={{
+            isUserLoggedIn,
+            loggedInUser,
+            signUpWithEmail,
+            signInWithEmail,
+            signInWithGoogle,
+            signInWithGithub,
+            logOut,
+            addReportToDb,
+            getReportByReportId
+        }}>
             {children}
         </FirebaseContext.Provider>
     )
