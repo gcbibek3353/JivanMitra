@@ -20,7 +20,7 @@ interface SavedMessage {
     content: string;
 }
 
-const Agent = ({ patientName, patientId }: AgentProps) => {
+const Agent = ({ patientName, patientId,summary }: AgentProps) => {
     const router = useRouter();
     const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
     const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -97,7 +97,8 @@ const Agent = ({ patientName, patientId }: AgentProps) => {
         await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
             variableValues: {
                 patientName, // update userName to patientName in vapi workflow
-                patientId
+                patientId,
+                summary
             }
         })
     }
