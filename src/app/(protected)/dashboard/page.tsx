@@ -1,11 +1,10 @@
-'use client';
+"use client";
 
-
-import { useFirebase } from '@/firebase/firebaseConfig';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import SidebarNav from './Navbar';
-import { FaSpinner } from 'react-icons/fa'; // Create this component or use a simple div
+import { useFirebase } from "@/firebase/firebaseConfig";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import SidebarNav from "./Navbar";
+import { FaSpinner } from "react-icons/fa"; // Create this component or use a simple div
 
 const Dashboard = () => {
   const { user, authloading } = useFirebase();
@@ -13,7 +12,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!authloading && !user) {
-      router.push('/sign-in');
+      router.push("/sign-in");
     }
   }, [user, authloading, router]);
 

@@ -1,7 +1,7 @@
-'use client'
-import { useFirebase } from '@/firebase/firebaseConfig';
-import { useRouter } from 'next/navigation';
-import React, { ReactNode, useEffect } from 'react'
+"use client";
+import { useFirebase } from "@/firebase/firebaseConfig";
+import { useRouter } from "next/navigation";
+import React, { ReactNode, useEffect } from "react";
 
 const layout = ({ children }: { children: ReactNode }) => {
   const { loggedInUser } = useFirebase();
@@ -15,9 +15,7 @@ const layout = ({ children }: { children: ReactNode }) => {
 
   if (!loggedInUser) return null;
 
-  return (
-    <div>{children}</div>
-  )
-}
+  return <div>{children}</div>;
+};
 
-export default layout
+export default layout;
