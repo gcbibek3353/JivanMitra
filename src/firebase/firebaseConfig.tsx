@@ -11,6 +11,8 @@ import {
   onAuthStateChanged,
   signOut,
   User,
+  setPersistence,
+  browserSessionPersistence
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { toast } from "sonner";
@@ -28,8 +30,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+setPersistence(auth,browserSessionPersistence)
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
+
 
 // --- Context Types ---
 interface FirebaseContextType {
@@ -39,6 +43,7 @@ interface FirebaseContextType {
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
   logOut: () => Promise<void>;
+  authloading:boolean
 }
 
 // --- Create Context ---
@@ -53,11 +58,14 @@ export const useFirebase = () => {
 // --- Provider ---
 export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const[authloading,setAuthloading]=useState(true)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthloading(false)
     });
+    
     return () => unsubscribe();
   }, []);
 
@@ -115,6 +123,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         signInWithGoogle,
         signInWithGithub,
         logOut,
+        authloading
       }}
     >
       {children}
