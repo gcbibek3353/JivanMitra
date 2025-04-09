@@ -188,26 +188,6 @@ const[authloading,setAuthloading]=useState(true)
         }
     }
 
-  };
-
-  return (
-    <FirebaseContext.Provider
-      value={{
-        user,
-        signUpWithEmail,
-        signInWithEmail,
-        signInWithGoogle,
-        signInWithGithub,
-        logOut,
-        authloading
-      }}
-    >
-      {children}
-    </FirebaseContext.Provider>
-  );
-};
-
-
     return (
         <FirebaseContext.Provider value={{
             isUserLoggedIn,
