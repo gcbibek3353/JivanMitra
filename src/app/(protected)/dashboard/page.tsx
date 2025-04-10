@@ -7,7 +7,7 @@ import { NutrientsIntake } from "@/components/nutrientsIntake";
 
 const Dashboard = () => {
   return (
-    <div className="space-y-6 ml-10">
+    <div className="space-y-6 ml-10 w-full mx-10 my-5">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
           Health Dashboard
