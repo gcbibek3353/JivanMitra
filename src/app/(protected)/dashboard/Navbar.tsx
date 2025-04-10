@@ -10,8 +10,12 @@ import {
   Apple,
   Dumbbell,
   LogOut,
+  BookText,
+  LayoutDashboard
 } from 'lucide-react';
 import { useFirebase } from '@/firebase/firebaseConfig';
+import Link from 'next/link';
+
 
 function SidebarNav() {
   const { loggedInUser, logOut } = useFirebase();
@@ -21,9 +25,14 @@ function SidebarNav() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const navItems = [
+    { icon: LayoutDashboard, label: 'dashboard', color: 'text-violet-600', path: '/dashboard' },
     { icon: Stethoscope, label: 'Consult', color: 'text-emerald-600', path: '/consult' },
+    { icon: BookText, label: 'info', color: 'text-red-600', path: '/info' },
     { icon: Apple, label: 'Nutrition Guide', color: 'text-purple-600', path: '/nutrition' },
     { icon: Dumbbell, label: 'Workout Guide', color: 'text-blue-600', path: '/workout' },
+    
+    
+    
   ];
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -76,7 +85,8 @@ function SidebarNav() {
         } lg:translate-x-0 transition-all duration-150 ease-linear flex flex-col`}
       >
         {/* Header Section */}
-        <div className="p-5 border-b flex items-center justify-between">
+        <div className="p-5 border-b flex items-center justify-evenly">
+          <Link href={"/"}>
           <h1
             className={`text-2xl font-bold text-gray-800 truncate transition-all ${
               isSidebarCollapsed ? 'max-w-0' : 'max-w-[160px]'
@@ -84,6 +94,7 @@ function SidebarNav() {
           >
             JivanMitra
           </h1>
+          </Link>
           <button
             onClick={toggleCollapse}
             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all 
