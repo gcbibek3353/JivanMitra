@@ -24,10 +24,14 @@ const layout = ({ children }: { children: ReactNode }) => {
   // }
 
   return (
-    <div className='flex'>
-       <SidebarNav />
-      {children}
-      </div>
+    <div className="flex h-screen overflow-hidden">
+        <div className="h-screen overflow-hidden border-r border-gray-200">
+          <SidebarNav />
+        </div>
+        <div className="flex-1 overflow-auto">
+          {children}
+        </div>
+</div>
   )
 }
 
