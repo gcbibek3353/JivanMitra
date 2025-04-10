@@ -28,6 +28,7 @@ const CreateWorkoutPage = () => {
     setLoading(true);
     try {
       const { success, workout } = await getWorkoutPlan({
+        // TODO : instead of passing the static data get it from the loggedInUser. Currently age , height , weight ... is not present.
         age: '20',
         height: '120',
         weight: '60',
@@ -61,7 +62,7 @@ const CreateWorkoutPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 w-full">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Workout Plans</h1>
         <button
