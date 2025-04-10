@@ -6,18 +6,18 @@ import { FaSpinner } from 'react-icons/fa';
 import SidebarNav from './dashboard/Navbar';
 
 const layout = ({ children }: { children: ReactNode }) => {
-  const { loggedInUser, authloading } = useFirebase();
+  const { loggedInUser, authloading,isUserLoggedIn } = useFirebase();
   const router = useRouter();
 
   useEffect(() => {
-    if (!authloading && !loggedInUser) {
+    if (!isUserLoggedIn) {
       router.push("/sign-in");
     }
   }, [loggedInUser, authloading, router]);
 
-  // if (authloading) {
-  //   return <FaSpinner />; // Or <div>Loading...</div>
-  // }
+  if (authloading) {
+    return <FaSpinner />; // Or <div>Loading...</div>
+  }
 
   return (
     <div className='flex'>

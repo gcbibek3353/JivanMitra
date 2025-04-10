@@ -2,10 +2,13 @@
 import { useFirebase } from '@/firebase/firebaseConfig';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import { jsPDF } from 'jspdf';
 
 const ReportPage = () => {
   const params = useParams();
+  const {loggedInUser} = useFirebase();
+  console.log(loggedInUser)
   const firebase = useFirebase();
   const router = useRouter();
   const [report, setReport] = useState<Report | null>(null);
@@ -28,44 +31,112 @@ const ReportPage = () => {
     }
   }
 
+  const downloadPdf = async () => {
+    if (!report) return;
+  
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    // Add title
+    pdf.setFontSize(20);
+    pdf.setTextColor(0, 0, 128); // Navy blue
+    pdf.text('Medical Report', 105, 20, { align: 'center' });
+    
+    pdf.setFontSize(12);
+    pdf.setTextColor(100); // Dark gray
+    pdf.text(`Report ID: ${params.reportId}`, 105, 30, { align: 'center' });
+    pdf.text(`Date: ${new Date().toLocaleDateString()}`, 105, 35, { align: 'center' });
+  
+    // Set styles for content
+    pdf.setFontSize(14);
+    pdf.setTextColor(0, 0, 0); // Black
+  
+    let yPosition = 50;
+  
+    // Function to add section
+    const addSection = (title: string, content: string | string[]) => {
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 128); // Navy blue
+      pdf.text(title + ':', 20, yPosition);
+      yPosition += 8;
+  
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0); // Black
+  
+      if (Array.isArray(content)) {
+        content.forEach(item => {
+          pdf.text('• ' + item, 25, yPosition);
+          yPosition += 7;
+        });
+      } else {
+        const lines = pdf.splitTextToSize(content, 170);
+        pdf.text(lines, 20, yPosition);
+        yPosition += lines.length * 7;
+      }
+      
+      yPosition += 10; // Space between sections
+    };
+  
+    // Add all sections
+    addSection('Symptoms', report.symptoms);
+    addSection('Potential Causes', report.causes);
+    addSection('Precautions', report.precaution);
+    addSection('Diagnostic Tests', report.suggested_Diagnostic_tests);
+    addSection('Symptoms to Monitor', report.symptoms_to_monitor);
+    addSection('Medications', report.medications);
+    addSection('Next Steps', report.next_step);
+  
+    pdf.save(`medical-report-${params.reportId}.pdf`);
+  };
+
   useEffect(() => {
     fetchReport();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+      <div className="flex justify-center items-center h-screen bg-white w-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (!report) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900">
-        <p className="text-xl text-gray-300">Report not found</p>
+      <div className="flex justify-center items-center h-screen bg-white w-full">
+        <p className="text-xl text-gray-700">Report not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 w-full h-full">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 mb-2">
             Medical Report
           </h1>
-          <p className="text-gray-400">Detailed analysis and recommendations</p>
+          <p className="text-gray-600">Detailed analysis and recommendations</p>
         </div>
 
-        <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+        <div id="report-content" className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+          {/* Header with patient info (you can add actual patient data if available) */}
+          <div className="bg-blue-50 px-6 py-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold text-blue-800">Patient Report</h2>
+                <p className="text-sm text-gray-600">Report ID: {params.reportId}</p>
+              </div>
+              <p className="text-sm text-gray-600">{new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+
           {/* Symptoms Section */}
           <Section title="Symptoms" icon="🩺">
             <ul className="space-y-2">
               {report.symptoms.map((symptom, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="text-cyan-400 mr-2">•</span>
-                  <span className="text-gray-300">{symptom}</span>
+                  <span className="text-blue-600 mr-2">•</span>
+                  <span className="text-gray-700">{symptom}</span>
                 </li>
               ))}
             </ul>
@@ -73,17 +144,17 @@ const ReportPage = () => {
 
           {/* Causes Section */}
           <Section title="Potential Causes" icon="🔍">
-            <p className="text-gray-300 whitespace-pre-line">{report.causes}</p>
+            <p className="text-gray-700 whitespace-pre-line">{report.causes}</p>
           </Section>
 
           {/* Precaution Section */}
           <Section title="Precautions" icon="🛡️">
-            <p className="text-gray-300 whitespace-pre-line">{report.precaution}</p>
+            <p className="text-gray-700 whitespace-pre-line">{report.precaution}</p>
           </Section>
 
           {/* Diagnostic Tests Section */}
           <Section title="Diagnostic Tests" icon="🧪">
-            <p className="text-gray-300 whitespace-pre-line">{report.suggested_Diagnostic_tests}</p>
+            <p className="text-gray-700 whitespace-pre-line">{report.suggested_Diagnostic_tests}</p>
           </Section>
 
           {/* Symptoms to Monitor Section */}
@@ -91,8 +162,8 @@ const ReportPage = () => {
             <ul className="space-y-2">
               {report.symptoms_to_monitor.map((symptom, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="text-cyan-400 mr-2">•</span>
-                  <span className="text-gray-300">{symptom}</span>
+                  <span className="text-blue-600 mr-2">•</span>
+                  <span className="text-gray-700">{symptom}</span>
                 </li>
               ))}
             </ul>
@@ -100,21 +171,27 @@ const ReportPage = () => {
 
           {/* Medications Section */}
           <Section title="Medications" icon="💊">
-            <p className="text-gray-300 whitespace-pre-line">{report.medications}</p>
+            <p className="text-gray-700 whitespace-pre-line">{report.medications}</p>
           </Section>
 
           {/* Next Steps Section */}
           <Section title="Next Steps" icon="🔄">
-            <p className="text-gray-300 whitespace-pre-line">{report.next_step}</p>
+            <p className="text-gray-700 whitespace-pre-line">{report.next_step}</p>
           </Section>
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="mt-10 text-center space-x-4">
           <button 
             onClick={() => router.push('/dashboard')}
-            className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-cyan-500/20"
+            className="px-8 py-3 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-all duration-300 shadow hover:shadow-md"
           >
             Return to Dashboard
+          </button>
+          <button 
+            onClick={downloadPdf}
+            className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-300 shadow hover:shadow-md"
+          >
+            Download PDF
           </button>
         </div>
       </div>
@@ -124,10 +201,10 @@ const ReportPage = () => {
 
 // Enhanced Section component with icon support
 const Section = ({ title, children, icon }: { title: string; children: React.ReactNode; icon?: string }) => (
-  <div className="border-b border-gray-700 last:border-b-0 px-6 py-5 hover:bg-gray-750 transition-colors duration-200">
+  <div className="border-b border-gray-200 last:border-b-0 px-6 py-5 hover:bg-blue-50 transition-colors duration-200">
     <div className="flex items-center mb-3">
       {icon && <span className="text-xl mr-3">{icon}</span>}
-      <h2 className="text-2xl font-semibold text-cyan-400">{title}</h2>
+      <h2 className="text-2xl font-semibold text-blue-700">{title}</h2>
     </div>
     <div className="pl-9">
       {children}

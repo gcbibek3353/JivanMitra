@@ -217,7 +217,6 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       const docSnapShot = await getDoc(docRef);
 
       if (docSnapShot.exists()) {
-        console.log("Document data:", docSnapShot.data());
         return {
           success: true,
           message: "got report successfully",
