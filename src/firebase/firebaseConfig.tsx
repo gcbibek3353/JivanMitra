@@ -51,27 +51,6 @@ interface FirebaseContextType {
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
   logOut: () => Promise<void>;
-  authloading: boolean
-  addReportToDb: ({ patientId, report }: addReportParams) => Promise<{
-    success: boolean,
-    message: string,
-    reportId: string
-  }>;
-  getReportByReportId: (reportId: string) => Promise<{
-    success: boolean,
-    message: string,
-    report: any
-  }>;
-}
-
-interface FirebaseContextType {
-  isUserLoggedIn: boolean;
-  loggedInUser: User | null;
-  signUpWithEmail: (email: string, password: string) => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithGithub: () => Promise<void>;
-  logOut: () => Promise<void>;
   authloading: boolean;
   fetchAllInfoRecords: () => Promise<any[]>;
   addInfoRecord: (record: any) => Promise<any>;

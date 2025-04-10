@@ -4,11 +4,11 @@ import { useFirebase } from "@/firebase/firebaseConfig";
 import React, { useEffect } from "react";
 
 const ConsultPage = () => {
-  const firebase = useFirebase();
+  const {fetchAllInfoRecords , loggedInUser} = useFirebase();
   const [records, setRecords] = React.useState<any[]>([]);
   useEffect(() => {
     const loadRecords = async () => {
-      const data = await firebase.fetchAllInfoRecords();
+      const data = await fetchAllInfoRecords();
       console.log(data);
       setRecords(data);
     };
@@ -23,8 +23,8 @@ const ConsultPage = () => {
   return (
     <div className="h-full w-full">
       <Agent
-        patientName={"Rajesh"}
-        patientId="abcdbhaikodd"
+        patientName={loggedInUser?.displayName as string}
+        patientId={loggedInUser?.uid}
         summary={records}
       />
       {/* This will contain the core logic of user interacting with AI */}

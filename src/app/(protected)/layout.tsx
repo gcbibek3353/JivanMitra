@@ -10,14 +10,14 @@ const layout = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isUserLoggedIn) {
+    if (!isUserLoggedIn && !authloading) {
       router.push("/sign-in");
     }
   }, [loggedInUser, authloading, router]);
 
-  if (authloading) {
-    return <FaSpinner />; // Or <div>Loading...</div>
-  }
+  // if (authloading) {
+  //   return <FaSpinner />; // Or <div>Loading...</div>
+  // }
 
   return (
     <div className='flex'>

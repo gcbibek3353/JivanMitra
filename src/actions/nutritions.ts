@@ -79,7 +79,6 @@ export const getNutritions = async (userInfo: UserInfoParams) => {
             message: "nutritions generated successfully",
             nutrition : object,
         }
-        //TODO: whenever it is received store in db
 
     } catch (error) {
         console.log(error);

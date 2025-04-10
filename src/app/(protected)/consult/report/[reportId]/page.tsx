@@ -7,8 +7,7 @@ import { jsPDF } from 'jspdf';
 
 const ReportPage = () => {
   const params = useParams();
-  const {loggedInUser} = useFirebase();
-  console.log(loggedInUser)
+  const { loggedInUser } = useFirebase();
   const firebase = useFirebase();
   const router = useRouter();
   const [report, setReport] = useState<Report | null>(null);
@@ -32,7 +31,7 @@ const ReportPage = () => {
   }
 
   const downloadPdf = async () => {
-    if (!report) return;
+    if (!report || !loggedInUser) return;
   
     const pdf = new jsPDF('p', 'mm', 'a4');
     
@@ -41,16 +40,19 @@ const ReportPage = () => {
     pdf.setTextColor(0, 0, 128); // Navy blue
     pdf.text('Medical Report', 105, 20, { align: 'center' });
     
+    // Add patient information
     pdf.setFontSize(12);
     pdf.setTextColor(100); // Dark gray
-    pdf.text(`Report ID: ${params.reportId}`, 105, 30, { align: 'center' });
-    pdf.text(`Date: ${new Date().toLocaleDateString()}`, 105, 35, { align: 'center' });
+    pdf.text(`Patient Name: ${loggedInUser.displayName || 'Not provided'}`, 20, 30);
+    pdf.text(`Email: ${loggedInUser.email || 'Not provided'}`, 20, 37);
+    pdf.text(`Report ID: ${params.reportId}`, 20, 44);
+    pdf.text(`Date: ${new Date().toLocaleDateString()}`, 20, 51);
   
     // Set styles for content
     pdf.setFontSize(14);
     pdf.setTextColor(0, 0, 0); // Black
   
-    let yPosition = 50;
+    let yPosition = 65; // Start below patient info
   
     // Function to add section
     const addSection = (title: string, content: string | string[]) => {
@@ -85,7 +87,7 @@ const ReportPage = () => {
     addSection('Medications', report.medications);
     addSection('Next Steps', report.next_step);
   
-    pdf.save(`medical-report-${params.reportId}.pdf`);
+    pdf.save(`medical-report-${loggedInUser.displayName || 'patient'}-${params.reportId}.pdf`);
   };
 
   useEffect(() => {
@@ -100,10 +102,10 @@ const ReportPage = () => {
     );
   }
 
-  if (!report) {
+  if (!report || !loggedInUser) {
     return (
       <div className="flex justify-center items-center h-screen bg-white w-full">
-        <p className="text-xl text-gray-700">Report not found</p>
+        <p className="text-xl text-gray-700">Report not found or user not logged in</p>
       </div>
     );
   }
@@ -119,14 +121,29 @@ const ReportPage = () => {
         </div>
 
         <div id="report-content" className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-          {/* Header with patient info (you can add actual patient data if available) */}
+          {/* Header with patient info */}
           <div className="bg-blue-50 px-6 py-4 border-b border-gray-200">
-            <div className="flex justify-between items-center">
+            <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-blue-800">Patient Report</h2>
-                <p className="text-sm text-gray-600">Report ID: {params.reportId}</p>
+                <div className="flex items-center mb-2">
+                  {loggedInUser.photoURL && (
+                    <img 
+                      src={loggedInUser.photoURL} 
+                      alt="Patient" 
+                      className="w-10 h-10 rounded-full mr-3"
+                    />
+                  )}
+                  <div>
+                    <h2 className="text-xl font-semibold text-blue-800">Patient Report</h2>
+                    <p className="text-sm text-gray-600">{loggedInUser.displayName}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">{loggedInUser.email}</p>
               </div>
-              <p className="text-sm text-gray-600">{new Date().toLocaleDateString()}</p>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Report ID: {params.reportId}</p>
+                <p className="text-sm text-gray-600">{new Date().toLocaleDateString()}</p>
+              </div>
             </div>
           </div>
 
