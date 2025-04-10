@@ -15,9 +15,9 @@ const layout = ({ children }: { children: ReactNode }) => {
     }
   }, [loggedInUser, authloading, router]);
 
-  if (authloading) {
-    return <FaSpinner />; // Or <div>Loading...</div>
-  }
+  // if (authloading) {
+  //   return <FaSpinner />; // Or <div>Loading...</div>
+  // }
 
   return (
     <div className='flex'>

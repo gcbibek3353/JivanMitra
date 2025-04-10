@@ -77,7 +77,7 @@ const Agent = ({ patientName, patientId,summary }: AgentProps) => {
         
             const res = await firebase.addReportToDb({patientId , report : object });
             console.log(res);
-            if(res.success && success) router.push(`/dashboard/report/${res.reportId}`)
+            if(res.success && success) router.push(`/consult/report/${res.reportId}`)
 
             // if (success && reportId) router.push(`/dashboard/report/${reportId}`)
         } catch (error) {
