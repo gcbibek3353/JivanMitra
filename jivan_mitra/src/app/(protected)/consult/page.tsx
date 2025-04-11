@@ -44,7 +44,6 @@ const ConsultPage = () => {
         patientName={loggedInUser?.displayName as string}
         patientId={loggedInUser?.uid}
         summary={JSON.stringify(summary)}
-        type="report"
       />
       temp page
     </div>
