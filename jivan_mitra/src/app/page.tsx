@@ -84,32 +84,36 @@ const Index = () => {
               Experience the future of healthcare with our intelligent voice assistant
             </p>
           </div>
-          <div className='px-4 py-8 md:px-12 lg:px-20'>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <FeatureCard
-              title="AI Doctor Consultation"
-              description="Speak naturally with our AI assistant for instant health guidance and preliminary diagnoses based on your symptoms."
-              icon={Stethoscope}
-            />
-            <FeatureCard
-              title="Customized Workout Routines"
-              description="Receive personalized fitness plans adapted to your health profile, goals, and available equipment."
-              icon={Dumbbell}
-            />
-            <FeatureCard
-              title="Medical Reports & Analytics"
-              description="View and generate detailed health summaries, track your progress, and get insights into your wellness journey."
-              icon={FileText}
-            />
+          <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border">
+              <div className="flex justify-center items-center h-12 mb-6 text-blue-600">
+                <img src="voice.svg" alt="Voice svg" width={60} height={60} className="mx-auto mb-4"/>              
+              </div>
+              <h3 className="flex justify-center items-center text-xl font-semibold mb-3 text-blue-900">Voice-Based Interaction</h3>
+              <p className="text-gray-600">Speak naturally — no typing required. Just talk, and Jivan Mitra listens and understands your needs.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow-sm border">
+              <div className="flex justify-center items-center h-12 mb-6 text-blue-600">
+              <img src="diagnosis.svg" alt="Diagnosis svg" width={60} height={60} className="mx-auto mb-4"/>
+              </div>
+              <h3 className="flex justify-center items-center text-xl font-semibold mb-3 text-blue-900">Smart Symptom Analysis</h3>
+              <p className="text-gray-600">AI-driven insights to help you understand what might be causing your symptoms with high accuracy.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow-sm border">
+              <div className="flex justify-center items-center h-12 mb-6 text-blue-600">
+              <img src="treatment.svg" alt="Treatment svg" width={60} height={60} className="mx-auto mb-4"/>
+              </div>
+              <h3 className="flex justify-center items-center text-xl font-semibold mb-3 text-blue-900">Preliminary Treatment Advice</h3>
+              <p className="text-gray-600">Get immediate suggestions for what to do next — whether it's rest, medication, or consulting a doctor.</p>
+            </div>
           </div>
           </div>
-          
+          </div>
           
           <div className="mt-16 text-center">
             <CTAButton className="mx-auto">Explore All Features</CTAButton>
           </div>
-        </div>
       </section>
       
       {/* How It Works Section */}
