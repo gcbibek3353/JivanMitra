@@ -66,9 +66,6 @@ const Agent = ({ patientName, type, patientId, summary }: AgentProps) => {
     }, []);
 
     const handleGenerateReport = async (messages: SavedMessage[]) => {
-        // TODO : create a server action which calls the gemini AI with messages , generates the report and saves the report to firestore db. 
-        // if (generated successfully) redirect user to the report page
-        // else redirect to dashboart with the toast message "Failed to generate report"
 
         try {
             const { success, object } = await createReport({
@@ -79,7 +76,7 @@ const Agent = ({ patientName, type, patientId, summary }: AgentProps) => {
 
             const res = await firebase.addReportToDb({ patientId, report: object });
             console.log(res);
-            if (res.success && success) router.push(`/consult/report/${res.reportId}`)
+            if (res.success && success) router.push(`/generateReport/report/${res.reportId}`)
 
             // if (success && reportId) router.push(`/dashboard/report/${reportId}`)
         } catch (error) {
@@ -272,7 +269,7 @@ const Agent = ({ patientName, type, patientId, summary }: AgentProps) => {
                                 <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                             </div>
                             <span className="text-lg">
-                                {isCallInactiveOrFinished ? 'Start Consultation' : 'Connecting...'}
+                                {isCallInactiveOrFinished ? (type === 'query' ? 'Start Consultation' : 'Start Call') : 'Connecting...'}
                             </span>
                         </button>
                     ) : (

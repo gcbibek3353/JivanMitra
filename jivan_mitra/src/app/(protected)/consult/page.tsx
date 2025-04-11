@@ -3,7 +3,7 @@ import Agent from "@/components/Agent";
 import { useFirebase } from "@/firebase/firebaseConfig";
 import React, { useEffect } from "react";
 
-const ConsultPage = () => {
+const testConsult = () => {
   const { fetchAllInfoRecords, loggedInUser } = useFirebase();
   const firebase = useFirebase();
   const [records, setRecords] = React.useState<any[]>([]);
@@ -29,7 +29,7 @@ const ConsultPage = () => {
         ...data,
         ...userProfile,
       };
-      // console.log(summ);
+    //   console.log(summ);
       setSummary(summ);
     };
 
@@ -44,11 +44,11 @@ const ConsultPage = () => {
         patientName={loggedInUser?.displayName as string}
         patientId={loggedInUser?.uid}
         summary={JSON.stringify(summary)}
-        type="report"
+        type="query"
       />
-      temp page
+      consult page
     </div>
   );
 };
 
-export default ConsultPage;
+export default testConsult;
