@@ -1,6 +1,7 @@
 "use client";
 
 import { initializeApp } from "firebase/app";
+import { format } from "date-fns";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -31,6 +32,7 @@ import {
   getDocs,
   getFirestore,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -75,6 +77,7 @@ interface FirebaseContextType {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
+  getOrCreateDailyTracking: (userId: string) => Promise<void>;
   deleteInfoRecord: (id: string) => Promise<void>;
   fetchAllInfoRecords: (userId: string) => Promise<any[]>;
   addInfoRecord: (record: any, userId: string) => Promise<any>;
@@ -92,25 +95,35 @@ interface FirebaseContextType {
   logOut: () => Promise<void>;
   authloading: boolean;
   fetchUserProfile: (userId: string) => Promise<any>;
+  updatePillStatus: (
+    userId: string,
+    date: string,
+    index: number,
+    taken: boolean
+  ) => Promise<any>;
   updateUserProfile: (userId: string, profile: UserProfile) => Promise<void>;
   addNutritionToDb: ({ patientId, nutrition }: addNutritionParams) => Promise<{
-    success: boolean,
-    message: string,
-    nutritionId: string
+    success: boolean;
+    message: string;
+    nutritionId: string;
   }>;
-  getNutritionsByPatientId: (patientId: string) => Promise<{
-    patientId: string,
-    nutrition: Nutrition
-  }[]>;
+  getNutritionsByPatientId: (patientId: string) => Promise<
+    {
+      patientId: string;
+      nutrition: Nutrition;
+    }[]
+  >;
   addWorkoutToDb: ({ patientId, workout }: addWorkoutParams) => Promise<{
-    success: boolean,
-    message: string,
-    workoutId: string
+    success: boolean;
+    message: string;
+    workoutId: string;
   }>;
-  getWorkoutsByPatientId: (patientId: string) => Promise<{
-    patientId: string,
-    workout: WorkOut
-  }[]>;
+  getWorkoutsByPatientId: (patientId: string) => Promise<
+    {
+      patientId: string;
+      workout: WorkOut;
+    }[]
+  >;
 }
 
 // --- Create Context ---
@@ -154,6 +167,28 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       toast.error(error.message);
     }
+  };
+  const updatePillStatus = async (
+    userId: string,
+    date: string,
+    index: number,
+    taken: boolean
+  ) => {
+    const docRef = doc(firebasedb, `users/${userId}/dailyTracking/${date}`);
+    const snapshot = await getDoc(docRef);
+
+    if (!snapshot.exists()) return;
+
+    const data = snapshot.data();
+    if (!data.pills || !data.pills[index]) return;
+
+    data.pills[index].taken = taken;
+
+    await updateDoc(docRef, {
+      pills: data.pills,
+    });
+
+    return data.pills;
   };
 
   const signInWithEmail = async (email: string, password: string) => {
@@ -206,8 +241,60 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       ...doc.data(),
     }));
   };
+  const getOrCreateDailyTracking = async (userId: string) => {
+    const today = format(new Date(), "yyyy-MM-dd");
+    const trackingDocRef = doc(
+      firebasedb,
+      `users/${userId}/dailyTracking/${today}`
+    );
+    const existing = await getDoc(trackingDocRef);
+
+    if (existing.exists()) {
+      return existing.data(); // ✅ Return existing
+    }
+
+    const records = await fetchAllInfoRecords(userId);
+    const todayDate = new Date();
+
+    const pills: any[] = [];
+
+    for (const record of records) {
+      const { sickness, medications } = record as any;
+
+      for (const med of medications) {
+        const start = med.startDate ? new Date(med.startDate) : null;
+        const end = med.endDate ? new Date(med.endDate) : null;
+
+        // Check if today falls within the start/end range (or if those are missing, assume daily)
+        const isWithinRange =
+          (!start || todayDate >= start) && (!end || todayDate <= end);
+
+        if (isWithinRange) {
+          for (const time of med.times || []) {
+            pills.push({
+              sickness,
+              medicineName: med.name,
+              dosage: med.dosage,
+              time,
+              taken: false,
+            });
+          }
+        }
+      }
+    }
+
+    const dailyTracking = {
+      date: today,
+      pills,
+    };
+
+    await setDoc(trackingDocRef, dailyTracking);
+
+    return dailyTracking;
+  };
 
   const addInfoRecord = async (record: any, userId: string) => {
+    console.log("fff", record);
     const docRef = await addDoc(collection(firebasedb, InfocollectionName), {
       ...record,
       userId,
@@ -339,26 +426,29 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const addNutritionToDb = async ({ patientId, nutrition }: addNutritionParams) => {
+  const addNutritionToDb = async ({
+    patientId,
+    nutrition,
+  }: addNutritionParams) => {
     try {
       const nutritionRef = await addDoc(collection(firebasedb, "nutritions"), {
         patientId,
-        nutrition
-      })
+        nutrition,
+      });
       return {
         success: true,
         message: "Nutrition saved to database successfully",
-        nutritionId: nutritionRef.id
-      }
+        nutritionId: nutritionRef.id,
+      };
     } catch (error) {
       console.log("Error saving the nutrition in DB", error);
       return {
         success: false,
         message: "FAiled to save nutrition",
-        nutritionId: ""
-      }
+        nutritionId: "",
+      };
     }
-  }
+  };
 
   const getNutritionsByPatientId = async (patientId: string) => {
     try {
@@ -368,8 +458,8 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       const q = query(nutritionsRef, where("patientId", "==", patientId));
       const querySnapshot = await getDocs(q);
 
-      const nutritions = querySnapshot.docs.map(doc => ({
-        ...doc.data()
+      const nutritions = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
       }));
       // console.log("Fetched nutritions:", nutritions);
       return nutritions;
@@ -384,22 +474,22 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     try {
       const workoutRef = await addDoc(collection(firebasedb, "workouts"), {
         patientId,
-        workout
-      })
+        workout,
+      });
       return {
-        success : true,
-        message : "Workout saved to database successfully",
-        workoutId : workoutRef.id
-      }
+        success: true,
+        message: "Workout saved to database successfully",
+        workoutId: workoutRef.id,
+      };
     } catch (error) {
       console.log("Error saving the workout in DB", error);
       return {
         success: false,
         message: "FAiled to save workout",
-        nutritionId: ""
-      }
+        nutritionId: "",
+      };
     }
-  }
+  };
 
   const getWorkoutsByPatientId = async (patientId: string) => {
     try {
@@ -407,8 +497,8 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       const q = query(workoutsRef, where("patientId", "==", patientId));
       const querySnapshot = await getDocs(q);
 
-      const workouts = querySnapshot.docs.map(doc => ({
-        ...doc.data()
+      const workouts = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
       }));
 
       return workouts;
@@ -416,11 +506,12 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       console.error("Error fetching workouts data:", error);
       return [];
     }
-  }
+  };
 
   return (
     <FirebaseContext.Provider
       value={{
+        updatePillStatus,
         isUserLoggedIn,
         loggedInUser,
         signUpWithEmail,
@@ -432,6 +523,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         updateInfoRecord,
         fetchAllInfoRecords,
         addReportToDb,
+        getOrCreateDailyTracking,
         getReportByReportId,
         logOut,
         authloading,
@@ -440,7 +532,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         addNutritionToDb,
         getNutritionsByPatientId,
         addWorkoutToDb,
-        getWorkoutsByPatientId
+        getWorkoutsByPatientId,
       }}
     >
       {children}
