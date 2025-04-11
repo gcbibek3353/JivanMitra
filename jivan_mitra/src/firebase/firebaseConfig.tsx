@@ -34,6 +34,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { Nutrition } from "@/actions/nutritions";
 
 // Add this type definition
 type UserProfile = {
@@ -91,6 +92,15 @@ interface FirebaseContextType {
   authloading: boolean;
   fetchUserProfile: (userId: string) => Promise<any>;
   updateUserProfile: (userId: string, profile: UserProfile) => Promise<void>;
+  addNutritionToDb: ({ patientId, nutrition }: addNutritionParams) => Promise<{
+    success: boolean,
+    message: string,
+    nutritionId: string
+  }>;
+  getNutritionsByPatientId: (patientId: string) => Promise<{
+    patientId: string,
+    nutrition: Nutrition
+  }[]>;
 }
 
 // --- Create Context ---
@@ -319,6 +329,47 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addNutritionToDb = async ({ patientId, nutrition }: addNutritionParams) => {
+    try {
+      const nutritionRef = await addDoc(collection(firebasedb, "nutritions"), {
+        patientId,
+        nutrition
+      })
+      return {
+        success: true,
+        message: "Nutrition saved to database successfully",
+        nutritionId: nutritionRef.id
+      }
+    } catch (error) {
+      console.log("Error saving the nutrition in DB", error);
+      return {
+        success: false,
+        message: "FAiled to save nutrition",
+        nutritionId: ""
+      }
+    }
+  }
+
+  const getNutritionsByPatientId = async (patientId: string) => {
+    try {
+      console.log(patientId);
+      const nutritionsRef = collection(firebasedb, "nutritions");
+
+      const q = query(nutritionsRef, where("patientId", "==", patientId));
+      const querySnapshot = await getDocs(q);
+
+      const nutritions = querySnapshot.docs.map(doc => ({
+        ...doc.data()
+      }));
+      // console.log("Fetched nutritions:", nutritions);
+      return nutritions;
+    } catch (error) {
+      console.error("Error fetching nutrition data:", error);
+      return [];
+    }
+  };
+
+
   return (
     <FirebaseContext.Provider
       value={{
@@ -338,6 +389,8 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         authloading,
         fetchUserProfile,
         updateUserProfile,
+        addNutritionToDb,
+        getNutritionsByPatientId
       }}
     >
       {children}
