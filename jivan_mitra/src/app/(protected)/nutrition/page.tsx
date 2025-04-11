@@ -10,15 +10,33 @@ interface dietResponse {
 }
 
 const CreateDietPage = () => {
+  const [profile, setProfile] = useState<any[]>([]);
   const [diets, setDiets] = useState<dietResponse[] | null>(null);
   const [expandedDietIndex, setExpandedDietIndex] = useState<number | null>(null);
-  const { addNutritionToDb, loggedInUser, getNutritionsByPatientId } = useFirebase();
+  const { addNutritionToDb, loggedInUser, getNutritionsByPatientId,fetchUserProfile, fetchAllInfoRecords } = useFirebase();
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchDiets = async () => {
     const res = await getNutritionsByPatientId(loggedInUser?.uid as string);
     setDiets(res);
   }
+
+  useEffect(() => {
+      const loadData = async () => {
+        const data = await fetchAllInfoRecords(
+          loggedInUser?.uid as string
+        );
+        const userProfile = await fetchUserProfile(
+          loggedInUser?.uid as string
+        ); // You'll need to implement this
+        // console.log("userrrr", userProfile);
+        if (userProfile) {
+          setProfile(userProfile);
+        }
+      };
+  
+      loadData();
+    }, []);
 
   useEffect(() => {
     fetchDiets();
@@ -28,12 +46,10 @@ const CreateDietPage = () => {
     setLoading(true);
     try {
       const { success, nutrition } = await getNutritions({
-        // TODO @PARIBESH01 : instead of passing the static data get it from the loggedInUser. Currently age , height , weight ... is not present.
-        age: '20',
-        height: '120',
-        weight: '60',
-        gender: 'male',
-        summary: `John is a 45-year-old male who stands 5 feet 10 inches tall and weighs 210 pounds...`
+        age: profile?.age,
+        height: profile?.height,
+        weight: profile?.weight,
+        gender: profile?.gender,
       });
 
       const res = await addNutritionToDb({
