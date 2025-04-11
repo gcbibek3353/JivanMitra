@@ -110,10 +110,6 @@ const Index = () => {
           </div>
           </div>
           </div>
-          
-          <div className="mt-16 text-center">
-            <CTAButton className="mx-auto">Explore All Features</CTAButton>
-          </div>
       </section>
       
       {/* How It Works Section */}

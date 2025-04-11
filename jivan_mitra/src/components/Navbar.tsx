@@ -25,7 +25,7 @@ function SidebarNav() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'dashboard', color: 'text-violet-600', path: '/dashboard' },
+    { icon: LayoutDashboard, label: 'Dashboard', color: 'text-violet-600', path: '/dashboard' },
     { icon: Stethoscope, label: 'Consult', color: 'text-emerald-600', path: '/consult' },
     { icon: Stethoscope, label: 'Test', color: 'text-emerald-600', path: '/test' },
     { icon: BookText, label: 'info', color: 'text-red-600', path: '/info' },

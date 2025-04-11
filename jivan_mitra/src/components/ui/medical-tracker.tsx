@@ -20,6 +20,8 @@ type MedicationSchedule = {
   name: string;
   dosage: number;
   times: string[];
+  startDate: string;
+  endDate: string;
 };
 
 type UserProfile = {
@@ -180,51 +182,56 @@ export function MedicationTracker() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {records.map((record) => (
-              <TableRow key={record.id}>
-                <TableCell className="font-medium align-top">
-                  {record.sickness}
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-4">
-                    {record.medications.map((med, idx) => (
-                      <div
-                        key={idx}
-                        className="border-l-4 border-slate-300 pl-4 py-1"
-                      >
-                        <div className="font-medium">{med.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {med.dosage} {med.dosage === 1 ? "pill" : "pills"} per
-                          dose
+            {records.length > 0 ? (
+              records.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell className="font-medium align-top">
+                    {record.sickness}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-4">
+                      {record.medications.map((med, idx) => (
+                        <div
+                          key={idx}
+                          className="border-l-4 border-slate-300 pl-4 py-1"
+                        >
+                          <div className="font-medium">{med.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {med.dosage} {med.dosage === 1 ? "pill" : "pills"}{" "}
+                            per dose
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(med.startDate).toLocaleDateString()} -{" "}
+                            {new Date(med.endDate).toLocaleDateString()}
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {med.times.map((time, timeIdx) => (
+                              <div
+                                key={timeIdx}
+                                className="flex items-center bg-slate-100 rounded-full px-3 py-1 text-xs"
+                              >
+                                <Clock className="h-3 w-3 mr-1" />
+                                {formatTime(time)}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {med.times.map((time, timeIdx) => (
-                            <div
-                              key={timeIdx}
-                              className="flex items-center bg-slate-100 rounded-full px-3 py-1 text-xs"
-                            >
-                              <Clock className="h-3 w-3 mr-1" />
-                              {formatTime(time)}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openEditDialog(record)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                    <span className="sr-only">Edit</span>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {records.length === 0 && (
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEditDialog(record)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
               <TableRow>
                 <TableCell
                   colSpan={3}

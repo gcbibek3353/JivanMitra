@@ -30,6 +30,10 @@ const faqItems = [
   {
     question: "Can JivanMitra help with specific health conditions?",
     answer: "JivanMitra can provide general information and lifestyle recommendations for managing various health conditions. However, it should be used as a supportive tool alongside professional medical care, especially for chronic or serious health conditions."
+  },
+  {
+    question: "What are the future goals of JivanMitra?",
+    answer: "The future goals of Jivan Mitra focus on enhancing accessibility, accuracy, and integration with real-world healthcare systems. These includes integration with IOT health device, multilingual support, real doctor connectivity and mobile app development."
   }
 ];
 
