@@ -27,6 +27,9 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
     const [messages, setMessages] = useState<SavedMessage[]>([]);
     const firebase = useFirebase();
 
+    console.log(summary);
+    
+
     useEffect(() => {
         const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
         const onCallEnd = () => setCallStatus(CallStatus.FINISHED);
