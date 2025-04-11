@@ -34,6 +34,8 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { Nutrition } from "@/actions/nutritions";
+import { WorkOut } from "@/actions/workout";
 
 // Add this type definition
 type UserProfile = {
@@ -91,6 +93,24 @@ interface FirebaseContextType {
   authloading: boolean;
   fetchUserProfile: (userId: string) => Promise<any>;
   updateUserProfile: (userId: string, profile: UserProfile) => Promise<void>;
+  addNutritionToDb: ({ patientId, nutrition }: addNutritionParams) => Promise<{
+    success: boolean,
+    message: string,
+    nutritionId: string
+  }>;
+  getNutritionsByPatientId: (patientId: string) => Promise<{
+    patientId: string,
+    nutrition: Nutrition
+  }[]>;
+  addWorkoutToDb: ({ patientId, workout }: addWorkoutParams) => Promise<{
+    success: boolean,
+    message: string,
+    workoutId: string
+  }>;
+  getWorkoutsByPatientId: (patientId: string) => Promise<{
+    patientId: string,
+    workout: WorkOut
+  }[]>;
 }
 
 // --- Create Context ---
@@ -319,6 +339,85 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addNutritionToDb = async ({ patientId, nutrition }: addNutritionParams) => {
+    try {
+      const nutritionRef = await addDoc(collection(firebasedb, "nutritions"), {
+        patientId,
+        nutrition
+      })
+      return {
+        success: true,
+        message: "Nutrition saved to database successfully",
+        nutritionId: nutritionRef.id
+      }
+    } catch (error) {
+      console.log("Error saving the nutrition in DB", error);
+      return {
+        success: false,
+        message: "FAiled to save nutrition",
+        nutritionId: ""
+      }
+    }
+  }
+
+  const getNutritionsByPatientId = async (patientId: string) => {
+    try {
+      console.log(patientId);
+      const nutritionsRef = collection(firebasedb, "nutritions");
+
+      const q = query(nutritionsRef, where("patientId", "==", patientId));
+      const querySnapshot = await getDocs(q);
+
+      const nutritions = querySnapshot.docs.map(doc => ({
+        ...doc.data()
+      }));
+      // console.log("Fetched nutritions:", nutritions);
+      return nutritions;
+    } catch (error) {
+      console.error("Error fetching nutrition data:", error);
+      return [];
+    }
+  };
+
+  const addWorkoutToDb = async ({ patientId, workout }: addWorkoutParams) => {
+    console.log("Adding workout to DB", { patientId, workout });
+    try {
+      const workoutRef = await addDoc(collection(firebasedb, "workouts"), {
+        patientId,
+        workout
+      })
+      return {
+        success : true,
+        message : "Workout saved to database successfully",
+        workoutId : workoutRef.id
+      }
+    } catch (error) {
+      console.log("Error saving the workout in DB", error);
+      return {
+        success: false,
+        message: "FAiled to save workout",
+        nutritionId: ""
+      }
+    }
+  }
+
+  const getWorkoutsByPatientId = async (patientId: string) => {
+    try {
+      const workoutsRef = collection(firebasedb, "workouts");
+      const q = query(workoutsRef, where("patientId", "==", patientId));
+      const querySnapshot = await getDocs(q);
+
+      const workouts = querySnapshot.docs.map(doc => ({
+        ...doc.data()
+      }));
+
+      return workouts;
+    } catch (error) {
+      console.error("Error fetching workouts data:", error);
+      return [];
+    }
+  }
+
   return (
     <FirebaseContext.Provider
       value={{
@@ -338,6 +437,10 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         authloading,
         fetchUserProfile,
         updateUserProfile,
+        addNutritionToDb,
+        getNutritionsByPatientId,
+        addWorkoutToDb,
+        getWorkoutsByPatientId
       }}
     >
       {children}
