@@ -69,6 +69,16 @@ interface FirebaseContextType {
   fetchAllInfoRecords: (userId: string) => Promise<any[]>;
   addInfoRecord: (record: any, userId: string) => Promise<any>;
   updateInfoRecord: (record: any) => Promise<void>;
+  addReportToDb: ({ patientId, report }: addReportParams) => Promise<{
+    success: boolean;
+    message: string;
+    reportId: string;
+  }>;
+  getReportByReportId: (reportId: string) => Promise<{
+    success: boolean;
+    message: string;
+    report: any;
+  }>;
   logOut: () => Promise<void>;
   authloading: boolean;
 }
@@ -187,6 +197,53 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     await deleteDoc(doc(firebasedb, InfocollectionName, id));
   };
 
+  const addReportToDb = async ({ patientId, report }: addReportParams) => {
+    try {
+      console.log(patientId);
+      console.log(report);
+
+      const reportRef = await addDoc(collection(firebasedb, "reports"), {
+        patientId,
+        report,
+      });
+      return {
+        success: true,
+        message: "Report saved to database successfully",
+        reportId: reportRef.id,
+      };
+    } catch (error) {
+      console.log("Error saving the report in DB", error);
+      return {
+        success: false,
+        message: "FAiled to save report",
+        reportId: "",
+      };
+    }
+  };
+
+  const getReportByReportId = async (reportId: string) => {
+    try {
+      const docRef = doc(firebasedb, "reports", reportId);
+      const docSnapShot = await getDoc(docRef);
+
+      if (docSnapShot.exists()) {
+        return {
+          success: true,
+          message: "got report successfully",
+          report: docSnapShot.data(),
+        };
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.log("Error while getting the report ", error);
+      return {
+        success: false,
+        message: "Failed to fetch report",
+      };
+    }
+  };
+
   return (
     <FirebaseContext.Provider
       value={{
@@ -200,6 +257,8 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         addInfoRecord,
         updateInfoRecord,
         fetchAllInfoRecords,
+        addReportToDb,
+        getReportByReportId,
         logOut,
         authloading,
       }}
