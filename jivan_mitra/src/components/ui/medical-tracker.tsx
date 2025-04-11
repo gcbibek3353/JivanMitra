@@ -56,9 +56,11 @@ export function MedicationTracker() {
       const data = await firebase.fetchAllInfoRecords(
         firebase.loggedInUser?.uid as string
       );
+      console.log("dataaaa", data);
       const userProfile = await firebase.fetchUserProfile(
         firebase.loggedInUser?.uid as string
       ); // You'll need to implement this
+      console.log("userrrr", userProfile);
       setRecords(data);
       if (userProfile) {
         setProfile(userProfile);
