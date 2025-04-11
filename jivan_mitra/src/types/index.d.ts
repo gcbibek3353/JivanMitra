@@ -4,6 +4,7 @@ interface AgentProps {
   consultId?: string;
   reportId?: string;
   summary: any;
+  type: "query" | "report";
 }
 
 interface createReportParams {
@@ -22,7 +23,6 @@ interface UserInfoParams {
   height : string;
   weight : string;
   gender : string;
-  summary : string
 }
 
 interface addNutritionParams{

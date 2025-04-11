@@ -10,15 +10,33 @@ interface workoutResponse {
 }
 
 const CreateWorkoutPage = () => {
+  const [profile, setProfile] = useState<any[]>([]);
   const [workouts, setWorkouts] = useState<workoutResponse[] | null>(null);
   const [expandedWorkoutIndex, setExpandedWorkoutIndex] = useState<number | null>(null);
-  const { addWorkoutToDb, loggedInUser, getWorkoutsByPatientId } = useFirebase();
+  const { addWorkoutToDb, loggedInUser, getWorkoutsByPatientId, fetchUserProfile, fetchAllInfoRecords } = useFirebase();
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchWorkouts = async () => {
     const res = await getWorkoutsByPatientId(loggedInUser?.uid as string);
     setWorkouts(res);
   }
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await fetchAllInfoRecords(
+        loggedInUser?.uid as string
+      );
+      const userProfile = await fetchUserProfile(
+        loggedInUser?.uid as string
+      ); // You'll need to implement this
+      // console.log("userrrr", userProfile);
+      if (userProfile) {
+        setProfile(userProfile);
+      }
+    };
+
+    loadData();
+  }, []);
 
   useEffect(() => {
     fetchWorkouts();
@@ -28,12 +46,11 @@ const CreateWorkoutPage = () => {
     setLoading(true);
     try {
       const { success, workout } = await getWorkoutPlan({
-        // TODO : instead of passing the static data get it from the loggedInUser. Currently age , height , weight ... is not present.
-        age: '20',
-        height: '120',
-        weight: '60',
-        gender: 'male',
-        summary: `John is a 45-year-old male who stands 5 feet 10 inches tall and weighs 210 pounds...`
+        // TODO @PARIBESH01 : instead of passing the static data get it from the loggedInUser. Currently age , height , weight ... is not present.
+        age: profile?.age,
+        height: profile?.height,
+        weight: profile?.weight,
+        gender: profile?.gender,
       });
 
       const res = await addWorkoutToDb({

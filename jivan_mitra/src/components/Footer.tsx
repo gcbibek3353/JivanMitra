@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
@@ -47,15 +48,20 @@ const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
               Contact Us
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-3"> 
               <li className="text-gray-600">
-                hello@jivanmitra.app
+                hello@jivanmitra.com
               </li>
               <li className="text-gray-600">
+                <Link href = "/privacyPolicy">
                 Privacy Policy
+                </Link>
               </li>
+              
               <li className="text-gray-600">
+                <Link href="/terms">
                 Terms of Service
+                </Link>
               </li>
             </ul>
           </div>

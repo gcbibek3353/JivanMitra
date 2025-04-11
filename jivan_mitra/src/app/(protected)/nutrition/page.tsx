@@ -8,36 +8,35 @@ interface dietResponse {
   patientId: string;
   nutrition: Nutrition;
 }
-interface Profile {
-  name: string;
-  age: number;
-  height: number;
-  weight: number;
-  gender: string;
-}
 
 const CreateDietPage = () => {
+  const [profile, setProfile] = useState<any[]>([]);
   const [diets, setDiets] = useState<dietResponse[] | null>(null);
   const [expandedDietIndex, setExpandedDietIndex] = useState<number | null>(null);
-  const { addNutritionToDb, loggedInUser, getNutritionsByPatientId,fetchAllInfoRecords } = useFirebase();
+  const { addNutritionToDb, loggedInUser, getNutritionsByPatientId,fetchUserProfile, fetchAllInfoRecords } = useFirebase();
   const [loading, setLoading] = useState<boolean>(false);
-  const[profile,setProfile] = useState<Profile | null>(null);
-  const firebase=useFirebase();
 
   const fetchDiets = async () => {
     const res = await getNutritionsByPatientId(loggedInUser?.uid as string);
     setDiets(res);
-    const userProfile = await firebase.fetchUserProfile(
-      firebase.loggedInUser?.uid as string
-    ); // You'll need to implement this
-    // console.log("userrrr", userProfile);
-    
-    if (userProfile) {
-      setProfile(userProfile);
-      console.log(userProfile)
-    }
-    
   }
+
+  useEffect(() => {
+      const loadData = async () => {
+        const data = await fetchAllInfoRecords(
+          loggedInUser?.uid as string
+        );
+        const userProfile = await fetchUserProfile(
+          loggedInUser?.uid as string
+        ); // You'll need to implement this
+        // console.log("userrrr", userProfile);
+        if (userProfile) {
+          setProfile(userProfile);
+        }
+      };
+  
+      loadData();
+    }, []);
 
   useEffect(() => {
     fetchDiets();
@@ -46,29 +45,25 @@ const CreateDietPage = () => {
   const dietGenerator = async () => {
     setLoading(true);
     try {
-      if (!profile || !profile.age || !profile.height || !profile.weight || !profile.gender) {
-        throw new Error("Incomplete profile information. Please update your profile.");
-      }
-  
       const { success, nutrition } = await getNutritions({
-        age: profile.age.toString(),
-        height: profile.height.toString(),
-        weight: profile.weight.toString(),
-        gender: profile.gender,
-        summary: `${profile.name || "User"} is a ${profile.age}-year-old ${profile.gender} who is ${profile.height} cm tall and weighs ${profile.weight} kg.`
+        age: profile?.age,
+        height: profile?.height,
+        weight: profile?.weight,
+        gender: profile?.gender,
       });
-  
+
       const res = await addNutritionToDb({
         patientId: loggedInUser?.uid as string,
         nutrition
       });
-  
+
       if (res.success && success) {
-        await fetchDiets(); // Refresh the list
+        await fetchDiets(); // Refresh the list after adding new diet
       }
     } catch (error) {
       console.error('Failed to generate the diet', error);
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { vapi } from "@/lib/vapi.sdk"
+import { interviewer, vapi } from "@/lib/vapi.sdk"
 import { createReport } from "@/actions/report.action";
 import Image from "next/image";
 import { useFirebase } from "@/firebase/firebaseConfig";
@@ -20,15 +20,14 @@ interface SavedMessage {
     content: string;
 }
 
-const Agent = ({ patientName, patientId, summary }: AgentProps) => {
+const Agent = ({ patientName, type, patientId, summary }: AgentProps) => {
     const router = useRouter();
     const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
     const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
     const [messages, setMessages] = useState<SavedMessage[]>([]);
     const firebase = useFirebase();
 
-    console.log(summary);
-    
+    // console.log(JSON.parse(summary));
 
     useEffect(() => {
         const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
@@ -67,9 +66,6 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
     }, []);
 
     const handleGenerateReport = async (messages: SavedMessage[]) => {
-        // TODO : create a server action which calls the gemini AI with messages , generates the report and saves the report to firestore db. 
-        // if (generated successfully) redirect user to the report page
-        // else redirect to dashboart with the toast message "Failed to generate report"
 
         try {
             const { success, object } = await createReport({
@@ -80,7 +76,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
 
             const res = await firebase.addReportToDb({ patientId, report: object });
             console.log(res);
-            if (res.success && success) router.push(`/consult/report/${res.reportId}`)
+            if (res.success && success) router.push(`/generateReport/report/${res.reportId}`)
 
             // if (success && reportId) router.push(`/dashboard/report/${reportId}`)
         } catch (error) {
@@ -91,19 +87,48 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
 
     useEffect(() => {
         if (callStatus === CallStatus.FINISHED) {
-            handleGenerateReport(messages);
+            if (type === "query") {
+                router.push('/dashboard');
+            }
+            else handleGenerateReport(messages);
         }
-    }, [messages, callStatus, patientId]);
+    }, [messages, callStatus, type, patientId]);
 
     const handleCall = async () => {
         setCallStatus(CallStatus.CONNECTING);
-        await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-            variableValues: {
-                patientName, // update userName to patientName in vapi workflow
-                patientId,
-                summary
-            }
-        })
+        if (type === "query") {
+            const jsonSummary = JSON.parse(summary);
+            
+            const params = {
+                age: jsonSummary.age,
+                height: jsonSummary.height,
+                gender: jsonSummary.gender,
+                weight: jsonSummary.weight,
+                sickness: jsonSummary['0']?.sickness ?? '',
+                dosage: jsonSummary['0']?.medications?.[0]?.dosage ?? '',
+                medicationName: jsonSummary['0']?.medications?.[0]?.name ?? '',
+                times: jsonSummary['0']?.medications?.[0]?.times?.join(", ") ?? ''
+              };
+              
+            console.log("params are ");
+            console.log(params);
+            
+            
+            await vapi.start(interviewer, {
+                variableValues: {
+                    params: params
+                }
+            })
+        }
+        else {
+            await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+                variableValues: {
+                    patientName, // update userName to patientName in vapi workflow
+                    patientId,
+                    summary
+                }
+            })
+        }
     }
 
     const handleDisconnect = async () => {
@@ -128,7 +153,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
                             </svg>
-                            JivanMitra Doctor 
+                            JivanMitra Doctor
                         </span>
                     </h2>
                     <div className="flex gap-2">
@@ -145,7 +170,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                         )}
                     </div>
                 </div>
-    
+
                 {/* Video Conference Area */}
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-br from-blue-50/30 to-cyan-50/30 p-0 overflow-hidden">
                     {/* AI Doctor Section */}
@@ -169,7 +194,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                                         </svg>
                                     </div>
                                 </div>
-    
+
                                 {isSpeaking && (
                                     <>
                                         <div className="absolute inset-0 rounded-full border-4 border-cyan-200/40 animate-ping opacity-75"></div>
@@ -177,10 +202,10 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                                     </>
                                 )}
                             </div>
-    
+
                             <h3 className="text-xl font-semibold text-gray-800">AI Doctor</h3>
                             <p className="text-cyan-600 text-sm font-medium">Medical Consultant</p>
-    
+
                             {isSpeaking && (
                                 <div className="mt-4 flex justify-center gap-1.5">
                                     {[1, 2, 3, 4, 5].map((i) => (
@@ -198,7 +223,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                             )}
                         </div>
                     </div>
-    
+
                     {/* Patient Section */}
                     <div className="relative bg-white/80 backdrop-blur-sm flex items-center justify-center">
                         <div className="text-center p-6">
@@ -223,7 +248,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                         </div>
                     </div>
                 </div>
-    
+
                 {/* Controls Section */}
                 <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-5 border-t border-gray-100 flex flex-col items-center">
                     {messages.length > 0 && (
@@ -233,7 +258,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                             </p>
                         </div>
                     )}
-    
+
                     {callStatus !== CallStatus.ACTIVE ? (
                         <button
                             onClick={handleCall}
@@ -244,7 +269,7 @@ const Agent = ({ patientName, patientId, summary }: AgentProps) => {
                                 <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                             </div>
                             <span className="text-lg">
-                                {isCallInactiveOrFinished ? 'Start Consultation' : 'Connecting...'}
+                                {isCallInactiveOrFinished ? (type === 'query' ? 'Start Consultation' : 'Start Call') : 'Connecting...'}
                             </span>
                         </button>
                     ) : (
