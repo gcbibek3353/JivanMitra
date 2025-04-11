@@ -9,7 +9,7 @@ const layout = ({ children }: { children: ReactNode }) => {
   const { loggedInUser, authloading,isUserLoggedIn } = useFirebase();
   const router = useRouter();
 
-  // TODO : Still some glitch on this auth logic .. Need to fix it .. Not_loggedInUser can also visit protected route right now
+  // TODO  : Still some glitch on this auth logic .. Need to fix it .. Not_loggedInUser can also visit protected route right now
 
   useEffect(() => {
     // console.log(isUserLoggedIn , authloading);
