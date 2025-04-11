@@ -27,6 +27,7 @@ function SidebarNav() {
   const navItems = [
     { icon: LayoutDashboard, label: 'dashboard', color: 'text-violet-600', path: '/dashboard' },
     { icon: Stethoscope, label: 'Consult', color: 'text-emerald-600', path: '/consult' },
+    { icon: Stethoscope, label: 'Test', color: 'text-emerald-600', path: '/test' },
     { icon: BookText, label: 'info', color: 'text-red-600', path: '/info' },
     { icon: Apple, label: 'Nutrition Guide', color: 'text-purple-600', path: '/nutrition' },
     { icon: Dumbbell, label: 'Workout Guide', color: 'text-blue-600', path: '/workout' },

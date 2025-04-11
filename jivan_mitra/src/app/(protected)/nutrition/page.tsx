@@ -28,7 +28,7 @@ const CreateDietPage = () => {
     setLoading(true);
     try {
       const { success, nutrition } = await getNutritions({
-        // TODO : instead of passing the static data get it from the loggedInUser. Currently age , height , weight ... is not present.
+        // TODO @PARIBESH01 : instead of passing the static data get it from the loggedInUser. Currently age , height , weight ... is not present.
         age: '20',
         height: '120',
         weight: '60',

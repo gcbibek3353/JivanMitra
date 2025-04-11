@@ -4,6 +4,7 @@ interface AgentProps {
   consultId?: string;
   reportId?: string;
   summary: any;
+  type: "query" | "report";
 }
 
 interface createReportParams {
