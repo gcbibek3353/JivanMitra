@@ -247,14 +247,21 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       firebasedb,
       `users/${userId}/dailyTracking/${today}`
     );
-    const existing = await getDoc(trackingDocRef);
-
-    if (existing.exists()) {
-      return existing.data(); // ✅ Return existing
-    }
+    const existingSnap = await getDoc(trackingDocRef);
+    const existingData = existingSnap.exists() ? existingSnap.data() : null;
 
     const records = await fetchAllInfoRecords(userId);
     const todayDate = new Date();
+
+    const existingTakenMap = new Map<string, boolean>();
+
+    // Create a map of existing pills to preserve 'taken' status
+    if (existingData?.pills) {
+      for (const pill of existingData.pills) {
+        const key = `${pill.medicineName}_${pill.dosage}_${pill.time}`;
+        existingTakenMap.set(key, pill.taken);
+      }
+    }
 
     const pills: any[] = [];
 
@@ -265,18 +272,18 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         const start = med.startDate ? new Date(med.startDate) : null;
         const end = med.endDate ? new Date(med.endDate) : null;
 
-        // Check if today falls within the start/end range (or if those are missing, assume daily)
         const isWithinRange =
           (!start || todayDate >= start) && (!end || todayDate <= end);
 
         if (isWithinRange) {
           for (const time of med.times || []) {
+            const key = `${med.name}_${med.dosage}_${time}`;
             pills.push({
               sickness,
               medicineName: med.name,
               dosage: med.dosage,
               time,
-              taken: false,
+              taken: existingTakenMap.get(key) || false,
             });
           }
         }
@@ -288,7 +295,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       pills,
     };
 
-    await setDoc(trackingDocRef, dailyTracking);
+    await setDoc(trackingDocRef, dailyTracking); // Overwrite existing each time
 
     return dailyTracking;
   };
