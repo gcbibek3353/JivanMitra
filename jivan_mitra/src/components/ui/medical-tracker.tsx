@@ -13,11 +13,20 @@ import {
 import { PlusCircle, Pencil, Clock } from "lucide-react";
 import { useFirebase } from "@/firebase/firebaseConfig";
 import { MedicationFormDialog } from "../medical-form-dialog";
+import { Label } from "@/components/ui/label";
+import { ProfileFormDialog } from "./profile-form-dialog";
 
 type MedicationSchedule = {
   name: string;
   dosage: number;
   times: string[];
+};
+
+type UserProfile = {
+  age: number;
+  weight: number; // in kg
+  height: number; // in cm
+  gender: "male" | "female" | "other";
 };
 
 type SicknessRecord = {
@@ -27,27 +36,43 @@ type SicknessRecord = {
 };
 
 export function MedicationTracker() {
-  const userId = "123"; // Replace with actual user ID
   const [records, setRecords] = useState<SicknessRecord[]>([]);
+  const [profile, setProfile] = useState<UserProfile>({
+    age: 0,
+    weight: 0,
+    height: 0,
+    gender: "other",
+  });
 
   const [open, setOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<SicknessRecord | null>(
     null
   );
   const firebase = useFirebase();
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
   useEffect(() => {
-    const loadRecords = async () => {
-      const data = await firebase.fetchAllInfoRecords(userId);
-      console.log(data);
+    const loadData = async () => {
+      const data = await firebase.fetchAllInfoRecords(
+        firebase.loggedInUser?.uid as string
+      );
+      const userProfile = await firebase.fetchUserProfile(
+        firebase.loggedInUser?.uid as string
+      ); // You'll need to implement this
       setRecords(data);
+      if (userProfile) {
+        setProfile(userProfile);
+      }
     };
 
-    loadRecords();
+    loadData();
   }, []);
 
   const handleAddRecord = async (record: Omit<SicknessRecord, "id">) => {
-    const newRecord = await firebase.addInfoRecord(record, userId);
+    const newRecord = await firebase.addInfoRecord(
+      record,
+      firebase.loggedInUser?.uid as string
+    );
     setRecords((prev) => [...prev, newRecord]);
     setOpen(false);
   };
@@ -88,8 +113,51 @@ export function MedicationTracker() {
     }
   };
 
+  const handleProfileUpdate = async (updatedProfile: UserProfile) => {
+    try {
+      await firebase.updateUserProfile(
+        firebase.loggedInUser?.uid as string,
+        updatedProfile
+      );
+      setProfile(updatedProfile);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
   return (
     <div>
+      <div className="mb-8 p-6 border rounded-lg bg-white">
+        <h2 className="text-xl font-semibold mb-4">Patient Profile</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <Label>Age</Label>
+            <div className="text-lg font-medium">{profile.age} years</div>
+          </div>
+          <div>
+            <Label>Weight</Label>
+            <div className="text-lg font-medium">{profile.weight} kg</div>
+          </div>
+          <div>
+            <Label>Height</Label>
+            <div className="text-lg font-medium">{profile.height} cm</div>
+          </div>
+          <div>
+            <Label>Gender</Label>
+            <div className="text-lg font-medium capitalize">
+              {profile.gender}
+            </div>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => setProfileDialogOpen(true)}
+        >
+          Edit Profile
+        </Button>
+      </div>
+
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">
           Sickness & Medication Schedule
@@ -174,6 +242,13 @@ export function MedicationTracker() {
         setOpen={setOpen}
         onSubmit={currentRecord ? handleEditRecord : handleAddRecord}
         record={currentRecord}
+      />
+
+      <ProfileFormDialog
+        open={profileDialogOpen}
+        setOpen={setProfileDialogOpen}
+        onSubmit={handleProfileUpdate}
+        profile={profile}
       />
     </div>
   );

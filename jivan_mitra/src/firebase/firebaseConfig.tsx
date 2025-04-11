@@ -35,6 +35,14 @@ import {
   where,
 } from "firebase/firestore";
 
+// Add this type definition
+type UserProfile = {
+  age: number;
+  weight: number; // in kg
+  height: number; // in cm
+  gender: "male" | "female" | "other";
+};
+
 // Firebase config from .env
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -81,6 +89,8 @@ interface FirebaseContextType {
   }>;
   logOut: () => Promise<void>;
   authloading: boolean;
+  fetchUserProfile: (userId: string) => Promise<any>;
+  updateUserProfile: (userId: string, profile: UserProfile) => Promise<void>;
 }
 
 // --- Create Context ---
@@ -244,6 +254,71 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const profileCollectionName = "userProfiles";
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const q = query(
+        collection(firebasedb, profileCollectionName),
+        where("userId", "==", userId)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const profileDoc = querySnapshot.docs[0];
+        return {
+          id: profileDoc.id,
+          ...profileDoc.data(),
+        };
+      }
+
+      // Return default profile if none exists
+      return {
+        age: 0,
+        weight: 0,
+        height: 0,
+        gender: "other",
+      };
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+
+      toast.error("Failed to fetch user profile");
+      return null;
+    }
+  };
+
+  const updateUserProfile = async (userId: string, profile: UserProfile) => {
+    try {
+      // First check if profile exists
+      const q = query(
+        collection(firebasedb, profileCollectionName),
+        where("userId", "==", userId)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // Update existing profile
+        const profileDoc = querySnapshot.docs[0];
+        await updateDoc(doc(firebasedb, profileCollectionName, profileDoc.id), {
+          ...profile,
+          updatedAt: new Date().toISOString(),
+        });
+      } else {
+        // Create new profile
+        await addDoc(collection(firebasedb, profileCollectionName), {
+          userId,
+          ...profile,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      toast.error("Failed to update profile");
+    }
+  };
+
   return (
     <FirebaseContext.Provider
       value={{
@@ -261,6 +336,8 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         getReportByReportId,
         logOut,
         authloading,
+        fetchUserProfile,
+        updateUserProfile,
       }}
     >
       {children}
