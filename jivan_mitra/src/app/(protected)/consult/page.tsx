@@ -15,11 +15,11 @@ const ConsultPage = () => {
       const data = await firebase.fetchAllInfoRecords(
         firebase.loggedInUser?.uid as string
       );
-      console.log("dataaaa", data);
+      // console.log("dataaaa", data);
       const userProfile = await firebase.fetchUserProfile(
         firebase.loggedInUser?.uid as string
       ); // You'll need to implement this
-      console.log("userrrr", userProfile);
+      // console.log("userrrr", userProfile);
       setRecords(data);
       if (userProfile) {
         setProfile(userProfile);
@@ -29,7 +29,7 @@ const ConsultPage = () => {
         ...data,
         ...userProfile,
       };
-      console.log(summ);
+      // console.log(summ);
       setSummary(summ);
     };
 
@@ -43,7 +43,6 @@ const ConsultPage = () => {
       <Agent
         patientName={loggedInUser?.displayName as string}
         patientId={loggedInUser?.uid}
-        // summary={records}
         summary={JSON.stringify(summary)}
       />
       temp page
