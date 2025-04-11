@@ -39,8 +39,8 @@ const Index = () => {
             JivanMitra combines cutting-edge AI with healthcare expertise to provide personalized guidance, fitness routines, and health insights.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Link href="/sign-in"><CTAButton size="lg" withArrow>Get Started</CTAButton></Link>
+          <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center items-center">
+            <Link href="/sign-in"><CTAButton  withArrow className='px-4 py-4 text-sm'  >Get Started</CTAButton></Link>
             <button className="flex items-center justify-center text-gray-600 hover:text-health-blue transition-colors font-medium">
               <a href='#faq'>Learn More</a> <ArrowDown className="ml-2 h-5 w-5" />
             </button>
