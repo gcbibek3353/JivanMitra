@@ -35,6 +35,7 @@ import {
   where,
 } from "firebase/firestore";
 import { Nutrition } from "@/actions/nutritions";
+import { WorkOut } from "@/actions/workout";
 
 // Add this type definition
 type UserProfile = {
@@ -100,6 +101,15 @@ interface FirebaseContextType {
   getNutritionsByPatientId: (patientId: string) => Promise<{
     patientId: string,
     nutrition: Nutrition
+  }[]>;
+  addWorkoutToDb: ({ patientId, workout }: addWorkoutParams) => Promise<{
+    success: boolean,
+    message: string,
+    workoutId: string
+  }>;
+  getWorkoutsByPatientId: (patientId: string) => Promise<{
+    patientId: string,
+    workout: WorkOut
   }[]>;
 }
 
@@ -369,6 +379,44 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addWorkoutToDb = async ({ patientId, workout }: addWorkoutParams) => {
+    console.log("Adding workout to DB", { patientId, workout });
+    try {
+      const workoutRef = await addDoc(collection(firebasedb, "workouts"), {
+        patientId,
+        workout
+      })
+      return {
+        success : true,
+        message : "Workout saved to database successfully",
+        workoutId : workoutRef.id
+      }
+    } catch (error) {
+      console.log("Error saving the workout in DB", error);
+      return {
+        success: false,
+        message: "FAiled to save workout",
+        nutritionId: ""
+      }
+    }
+  }
+
+  const getWorkoutsByPatientId = async (patientId: string) => {
+    try {
+      const workoutsRef = collection(firebasedb, "workouts");
+      const q = query(workoutsRef, where("patientId", "==", patientId));
+      const querySnapshot = await getDocs(q);
+
+      const workouts = querySnapshot.docs.map(doc => ({
+        ...doc.data()
+      }));
+
+      return workouts;
+    } catch (error) {
+      console.error("Error fetching workouts data:", error);
+      return [];
+    }
+  }
 
   return (
     <FirebaseContext.Provider
@@ -390,7 +438,9 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         fetchUserProfile,
         updateUserProfile,
         addNutritionToDb,
-        getNutritionsByPatientId
+        getNutritionsByPatientId,
+        addWorkoutToDb,
+        getWorkoutsByPatientId
       }}
     >
       {children}
