@@ -14,11 +14,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, Clock, Pill, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 type MedicationSchedule = {
   name: string;
   dosage: number;
   times: string[];
+  startDate: string;
+  endDate: string;
 };
 
 type SicknessRecord = {
@@ -47,6 +50,8 @@ export function MedicationFormDialog({
   const [newMedDosage, setNewMedDosage] = useState(1);
   const [newMedTimes, setNewMedTimes] = useState<string[]>([]);
   const [editingMedIndex, setEditingMedIndex] = useState<number | null>(null);
+  const [newMedStartDate, setNewMedStartDate] = useState("");
+  const [newMedEndDate, setNewMedEndDate] = useState("");
 
   useEffect(() => {
     if (record) {
@@ -67,6 +72,8 @@ export function MedicationFormDialog({
     setNewMedName("");
     setNewMedDosage(1);
     setNewMedTimes([]);
+    setNewMedStartDate("");
+    setNewMedEndDate("");
     setEditingMedIndex(null);
   };
 
@@ -82,13 +89,21 @@ export function MedicationFormDialog({
       sickness: sickness.trim(),
       medications,
     };
-
+    console.log("medical DAta", medicalData);
     onSubmit(medicalData);
     resetForm();
   };
 
   const addMedication = () => {
-    if (!newMedName.trim()) return;
+    if (!newMedName.trim()) {
+      toast.error("Please enter medication name");
+      return;
+    }
+
+    if (newMedTimes.length === 0) {
+      toast.error("Please add at least one time");
+      return;
+    }
 
     if (editingMedIndex !== null) {
       const updatedMedications = [...medications];
@@ -96,6 +111,8 @@ export function MedicationFormDialog({
         name: newMedName.trim(),
         dosage: newMedDosage,
         times: [...newMedTimes],
+        startDate: newMedStartDate,
+        endDate: newMedEndDate,
       };
       setMedications(updatedMedications);
     } else {
@@ -105,6 +122,8 @@ export function MedicationFormDialog({
           name: newMedName.trim(),
           dosage: newMedDosage,
           times: [...newMedTimes],
+          startDate: newMedStartDate,
+          endDate: newMedEndDate,
         },
       ]);
     }
@@ -121,6 +140,8 @@ export function MedicationFormDialog({
     setNewMedName(med.name);
     setNewMedDosage(med.dosage);
     setNewMedTimes(med.times);
+    setNewMedStartDate(med.startDate);
+    setNewMedEndDate(med.endDate);
     setEditingMedIndex(index);
   };
 
@@ -197,56 +218,76 @@ export function MedicationFormDialog({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Times to Take</Label>
-                      <div className="flex gap-2 items-center">
-                        <Input
-                          type="time"
-                          className="w-36"
-                          onKeyDown={(e) => {
-                            const time = e.currentTarget.value;
-                            if (
-                              e.key === "Enter" &&
-                              time &&
-                              !newMedTimes.includes(time)
-                            ) {
-                              setNewMedTimes((prev) => [...prev, time].sort());
-                              e.currentTarget.value = "";
-                            }
-                          }}
-                          onBlur={(e) => {
-                            const time = e.target.value;
-                            if (time && !newMedTimes.includes(time)) {
-                              setNewMedTimes((prev) => [...prev, time].sort());
-                              e.target.value = "";
-                            }
-                          }}
-                        />
-                      </div>
+                      <Label htmlFor="startDate">Start Date</Label>
+                      <Input
+                        id="startDate"
+                        type="date"
+                        value={newMedStartDate}
+                        onChange={(e) => setNewMedStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="endDate">End Date</Label>
+                      <Input
+                        id="endDate"
+                        type="date"
+                        value={newMedEndDate}
+                        onChange={(e) => setNewMedEndDate(e.target.value)}
+                        min={newMedStartDate}
+                      />
+                    </div>
+                  </div>
 
-                      <div className="flex flex-wrap gap-2">
-                        {newMedTimes.map((time, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center bg-slate-100 rounded-full px-3 py-1 text-xs"
+                  <div className="space-y-2">
+                    <Label>Times to Take</Label>
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        type="time"
+                        className="w-36"
+                        onKeyDown={(e) => {
+                          const time = e.currentTarget.value;
+                          if (
+                            e.key === "Enter" &&
+                            time &&
+                            !newMedTimes.includes(time)
+                          ) {
+                            setNewMedTimes((prev) => [...prev, time].sort());
+                            e.currentTarget.value = "";
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const time = e.target.value;
+                          if (time && !newMedTimes.includes(time)) {
+                            setNewMedTimes((prev) => [...prev, time].sort());
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {newMedTimes.map((time, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center bg-slate-100 rounded-full px-3 py-1 text-xs"
+                        >
+                          <Clock className="h-3 w-3 mr-1" />
+                          {time}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              setNewMedTimes((prev) =>
+                                prev.filter((_, i) => i !== index)
+                              )
+                            }
+                            className="h-4 w-4 ml-1 text-destructive"
                           >
-                            <Clock className="h-3 w-3 mr-1" />
-                            {time}
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                setNewMedTimes((prev) =>
-                                  prev.filter((_, i) => i !== index)
-                                )
-                              }
-                              className="h-4 w-4 ml-1 text-destructive"
-                            >
-                              <X className="h-2 w-2" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
+                            <X className="h-2 w-2" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
