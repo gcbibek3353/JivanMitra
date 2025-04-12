@@ -44,10 +44,7 @@ const testConsult = () => {
         patientName={loggedInUser?.displayName as string}
         patientId={loggedInUser?.uid}
         summary={JSON.stringify(summary)}
-<<<<<<< HEAD
         type="query"
-=======
->>>>>>> 0902d1df66d7ba59cc9a96e241a82334f9126aa3
       />
       consult page
     </div>
