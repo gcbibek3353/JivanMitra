@@ -11,10 +11,13 @@ import {
   Dumbbell,
   LogOut,
   BookText,
-  LayoutDashboard
+  LayoutDashboard,
+  History,
+  FileCheck2Icon
 } from 'lucide-react';
 import { useFirebase } from '@/firebase/firebaseConfig';
 import Link from 'next/link';
+
 
 
 function SidebarNav() {
@@ -28,9 +31,9 @@ function SidebarNav() {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', color: 'text-violet-600', path: '/dashboard' },
     { icon: Stethoscope, label: 'Consult', color: 'text-emerald-600', path: '/consult' },
-    { icon: Stethoscope, label: 'Generate Report', color: 'text-emerald-600', path: '/generateReport' },
+    { icon: History, label: 'Generate Report', color: 'text-blue-600', path: '/generateReport' },
     { icon: BookText, label: 'Info', color: 'text-red-600', path: '/info' },
-    { icon: BookText, label: 'Reports', color: 'text-red-600', path: '/reports' },
+    { icon: FileCheck2Icon, label: 'Reports', color: 'text-amber-600', path: '/reports' },
     { icon: Apple, label: 'Nutrition Guide', color: 'text-purple-600', path: '/nutrition' },
     { icon: Dumbbell, label: 'Workout Guide', color: 'text-blue-600', path: '/workout' },
     
@@ -63,7 +66,7 @@ function SidebarNav() {
         aria-label="Toggle navigation menu"
       >
         {isSidebarOpen ? (
-          <X className="w-7 h-7 transition-transform" />
+          <X className="w-7 h-7 transition-transform " />
         ) : (
           <Menu className="w-7 h-7 transition-transform" />
         )}
