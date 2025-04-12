@@ -35,7 +35,7 @@ export const getWorkoutPlan = async (userInfo: UserInfoParams) => {
         const googleModel = google('gemini-2.0-flash-001', {
             structuredOutputs: false,
         });
-        console.log(`control inside getWorkoutPlan`);
+        // console.log(`control inside getWorkoutPlan`);
         const geminiRes = await generateObject({
             model: googleModel,
             schema: workoutPlanSchema,
@@ -53,8 +53,8 @@ Provide a detailed weekly schedule including exercise types, duration, sets/reps
             `
         });
 
-        console.log(geminiRes);
-        console.log(geminiRes.object);
+        // console.log(geminiRes);
+        // console.log(geminiRes.object);
 
         return {
             success: true,

@@ -46,7 +46,6 @@ const testConsult = () => {
         summary={JSON.stringify(summary)}
         type="query"
       />
-      consult page
     </div>
   );
 };

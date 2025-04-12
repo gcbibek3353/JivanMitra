@@ -89,7 +89,7 @@ export function MedicationFormDialog({
       sickness: sickness.trim(),
       medications,
     };
-    console.log("medical DAta", medicalData);
+    // console.log("medical DAta", medicalData);
     onSubmit(medicalData);
     resetForm();
   };

@@ -92,6 +92,11 @@ interface FirebaseContextType {
     message: string;
     report: any;
   }>;
+  getReportByUserId : (userId: string) => Promise<{
+    success: boolean;
+    message: string;
+    data: any[];
+  }>;
   logOut: () => Promise<void>;
   authloading: boolean;
   fetchUserProfile: (userId: string) => Promise<any>;
@@ -368,6 +373,35 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getReportByUserId = async (userId: string) => {
+    try {
+      const q = query(
+        collection(firebasedb, "reports"),
+        where("patientId", "==", userId)
+      );
+      const querySnapshot = await getDocs(q);
+  
+      const reports: any[] = [];
+      querySnapshot.forEach((doc) => {
+        reports.push({ id: doc.id, ...doc.data() });
+      });
+      console.log(reports);
+      
+      return {
+        success: true,
+        message: "Reports fetched successfully",
+        data: reports,
+      };
+    } catch (error) {
+      console.log("Error while getting the reports ", error);
+      return {
+        success: false,
+        message: "Failed to fetch report",
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  };
+
   const profileCollectionName = "userProfiles";
 
   const fetchUserProfile = async (userId: string) => {
@@ -540,6 +574,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
         getNutritionsByPatientId,
         addWorkoutToDb,
         getWorkoutsByPatientId,
+        getReportByUserId
       }}
     >
       {children}
