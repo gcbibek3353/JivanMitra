@@ -51,9 +51,6 @@ const page = () => {
                                         <h2 className="text-lg font-medium text-gray-900">
                                             Report ID: <span className="font-semibold">{report.id}</span>
                                         </h2>
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                            {report.report?.date || 'No date'}
-                                        </span>
                                     </div>
                                     <div className="mt-4 flex justify-end">
                                         <Link 
