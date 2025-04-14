@@ -72,7 +72,7 @@ export const getNutritions = async (userInfo: UserInfoParams) => {
     Ensure the nutrition plan is well-balanced, health-conscious, and tailored to the individual's background and physical profile. Provide detailed suggestions including total calories, macronutrients, micronutrients, meal breakdowns, food recommendations, water intake, and any relevant notes or advice.
       `
         });
-        // console.log(object);
+        console.log(object);
 
         return {
             success: true,

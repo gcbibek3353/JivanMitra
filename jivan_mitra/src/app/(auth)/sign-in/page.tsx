@@ -27,7 +27,7 @@ export default function SignInPage() {
     setLoading(true)
     try {
       await signInWithEmail(email, password);
-      console.log('control here');
+      // console.log('control here');
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Email sign-in failed");

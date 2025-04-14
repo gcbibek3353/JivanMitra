@@ -11,7 +11,7 @@ const page = () => {
     const fetchReports = async () => {
         try {
             const response = await getReportByUserId(loggedInUser?.uid as string);
-            console.log(response.data);
+            // console.log(response.data);
             setReports(response.data)
         } catch (error) {
             console.log(error);

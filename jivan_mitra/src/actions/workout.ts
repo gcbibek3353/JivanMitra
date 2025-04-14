@@ -30,7 +30,7 @@ const workoutPlanSchema = z.object({
 export type WorkOut = z.infer<typeof workoutPlanSchema>;
 
 export const getWorkoutPlan = async (userInfo: UserInfoParams) => {
-    console.log(userInfo);
+    // console.log(userInfo);
     try {
         const googleModel = google('gemini-2.0-flash-001', {
             structuredOutputs: false,

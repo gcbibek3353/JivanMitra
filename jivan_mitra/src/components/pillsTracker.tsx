@@ -25,7 +25,7 @@ export function PillsTracker() {
       const data = await firebase.getOrCreateDailyTracking(
         firebase.loggedInUser?.uid as string
       );
-      console.log("_____", data);
+      // console.log("_____", data);
       setPills(data.pills);
       setLoading(false);
     };

@@ -306,7 +306,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addInfoRecord = async (record: any, userId: string) => {
-    console.log("fff", record);
+    // console.log("fff", record);
     const docRef = await addDoc(collection(firebasedb, InfocollectionName), {
       ...record,
       userId,
@@ -328,8 +328,8 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
 
   const addReportToDb = async ({ patientId, report }: addReportParams) => {
     try {
-      console.log(patientId);
-      console.log(report);
+      // console.log(patientId);
+      // console.log(report);
 
       const reportRef = await addDoc(collection(firebasedb, "reports"), {
         patientId,

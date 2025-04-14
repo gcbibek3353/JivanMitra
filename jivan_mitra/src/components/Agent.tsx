@@ -109,10 +109,6 @@ const Agent = ({ patientName, type, patientId, summary }: AgentProps) => {
                 medicationName: jsonSummary['0']?.medications?.[0]?.name ?? '',
                 times: jsonSummary['0']?.medications?.[0]?.times?.join(", ") ?? ''
               };
-              
-            console.log("params are ");
-            console.log(params);
-            
             
             await vapi.start(interviewer, {
                 variableValues: {
