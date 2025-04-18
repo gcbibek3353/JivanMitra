@@ -385,7 +385,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
       querySnapshot.forEach((doc) => {
         reports.push({ id: doc.id, ...doc.data() });
       });
-      console.log(reports);
+      // console.log(reports);
       
       return {
         success: true,
@@ -493,7 +493,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
 
   const getNutritionsByPatientId = async (patientId: string) => {
     try {
-      console.log(patientId);
+      // console.log(patientId);
       const nutritionsRef = collection(firebasedb, "nutritions");
 
       const q = query(nutritionsRef, where("patientId", "==", patientId));
@@ -511,7 +511,7 @@ export const FirebaseProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addWorkoutToDb = async ({ patientId, workout }: addWorkoutParams) => {
-    console.log("Adding workout to DB", { patientId, workout });
+    // console.log("Adding workout to DB", { patientId, workout });
     try {
       const workoutRef = await addDoc(collection(firebasedb, "workouts"), {
         patientId,

@@ -22,7 +22,6 @@ import Link from 'next/link';
 
 function SidebarNav() {
   const { loggedInUser, logOut } = useFirebase();
-  console.log(loggedInUser)
   // console.log(loggedInUser)
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

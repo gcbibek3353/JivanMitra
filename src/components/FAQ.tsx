@@ -8,32 +8,32 @@ import {
 
 const faqItems = [
   {
-    question: "What is JivanMitra?",
-    answer: "JivanMitra is an AI-powered health assistant that provides personalized health guidance, fitness routines, and medical insights through a conversational interface. It combines cutting-edge AI with healthcare expertise to support your wellness journey."
+    question: "What is JivanMitra and how does it work?",
+    answer: "JivanMitra is an AI-powered health assistant that talks with you, understands your health history, and provides personalized symptom analysis, diet plans, and workout suggestions—all through a simple voice-based interface."
   },
   {
-    question: "Is my health data secure?",
-    answer: "Absolutely. We use industry-leading encryption and follow strict HIPAA-compliant protocols to ensure your health data remains private and secure. Your information is never shared with third parties without your explicit consent."
+    question: "Is JivanMitra a replacement for a doctor?",
+    answer: "No. JivanMitra is designed for early assistance and lifestyle guidance. It helps you understand your symptoms and suggests next steps—but it's not a substitute for professional medical diagnosis."
   },
   {
-    question: "How accurate is the AI health guidance?",
-    answer: "JivanMitra's AI is trained on comprehensive medical knowledge and is continuously updated with the latest research. While it provides valuable health insights, it's designed to complement, not replace, professional medical advice. Always consult healthcare professionals for serious health concerns."
+    question: "What kind of questions can I ask JivanMitra?",
+    answer: "You can talk about symptoms you're experiencing, your health goals, daily routines, or ask for a diet or fitness plan tailored to your conditions and lifestyle."
   },
   {
-    question: "Do I need special equipment for the workout routines?",
-    answer: "No. JivanMitra creates customized workout plans based on your goals, fitness level, and available resources. You can specify what equipment you have access to, and the AI will tailor exercises accordingly, including equipment-free options."
+    question: "How does JivanMitra personalize my health reports?",
+    answer: "We analyze the health information you provide during sign-up (or later), including any medical history, age, and goals, to tailor advice and plans that are just right for you."
   },
   {
-    question: "Is there a subscription fee?",
-    answer: "JivanMitra offers both free and premium subscription options. The free tier provides basic health guidance and limited features, while premium subscriptions unlock the full range of personalized services, detailed analytics, and priority support."
+    question: "Can I use JivanMitra in my native language?",
+    answer: "Currently, JivanMitra supports English, but we're working on adding support for regional languages soon to make it more accessible for everyone."
   },
   {
-    question: "Can JivanMitra help with specific health conditions?",
-    answer: "JivanMitra can provide general information and lifestyle recommendations for managing various health conditions. However, it should be used as a supportive tool alongside professional medical care, especially for chronic or serious health conditions."
+    question: "How accurate is the health advice given?",
+    answer: "JivanMitra uses state-of-the-art AI models like Gemini Pro to provide evidence-based guidance. While it aims to be helpful, we always recommend following up with a healthcare professional for serious concerns."
   },
   {
-    question: "What are the future goals of JivanMitra?",
-    answer: "The future goals of Jivan Mitra focus on enhancing accessibility, accuracy, and integration with real-world healthcare systems. These includes integration with IOT health device, multilingual support, real doctor connectivity and mobile app development."
+    question: "Is JivanMitra free to use?",
+    answer: "Yes! The core features including consultation, diet/workout plans, and reports are completely free. Premium features may be added in the future."
   }
 ];
 

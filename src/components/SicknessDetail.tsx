@@ -31,7 +31,7 @@ export default function SicknessDetails() {
       if (!firebase.loggedInUser?.uid) return;
       const data = await firebase.fetchAllInfoRecords(firebase.loggedInUser.uid);
       setSicknessData(data);
-      console.log("Fetched Data:", data);
+      // console.log("Fetched Data:", data);
     };
 
     loadData();
